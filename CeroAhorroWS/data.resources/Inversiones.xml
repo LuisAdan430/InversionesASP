@@ -1,0 +1,164 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/jee 
+	http://www.springframework.org/schema/jee/spring-jee-3.0.xsd"
+	xmlns:jee="http://www.springframework.org/schema/jee">
+   
+	
+	  <bean id="InsertarReinversion" class="java.lang.String">
+		<constructor-arg type="java.lang.String" 
+		value="INSERT INTO ahreinversion (
+			id,
+			cuenta,
+			ahorro_contrato_id,
+			rendimiento_id,
+			tipo_capitalizar_id,
+			monto,
+ 			ahtipo_reinversion_id,
+ 			usuario_creacion,
+ 			fecha_creacion)
+			VALUES(?, ?, ?, ?, ?, ? ,? ,? ,CURRENT_TIMESTAMP)returning id;">
+		</constructor-arg>
+	</bean> 
+	 <bean id="consultarRendimiento" class="java.lang.String">
+		<constructor-arg type="java.lang.String" 
+			value="select porcentaje  from ahorro_rangos_rendimiento arr where rendimiento_id = ?;"/>
+	</bean>
+	<bean id="consultarMeses" class="java.lang.String">
+		<constructor-arg type="java.lang.String" 
+			value="select meses  from tipos_inversion ti where rendimiento_id =? ;"/>
+	</bean>
+ 	
+	 <bean id="sigSecAhreinversion" class="java.lang.String">
+		<constructor-arg type="java.lang.String" 
+			value="select nextval('ahreinversion_id_seq'::text::regclass)"/>
+	</bean>
+	
+	 <bean id="consultarCuentasCero" class="java.lang.String">
+		<constructor-arg type="java.lang.String" 
+			value="SELECT nucleocentral.ncposicionglobalah.cuentaah
+				   FROM nucleocentral.ncposicionglobalah
+				   INNER JOIN ahorro.ahcuentas ON nucleocentral.ncposicionglobalah.cuentaah = ahorro.ahcuentas.cuenta 
+				   where ahorro.ahcuentas.producto_ahorro_id = 6 ;"/>
+	</bean>
+	
+	
+	 <bean id="consultarCuentasProcrea" class="java.lang.String">
+		<constructor-arg type="java.lang.String" 
+			value="SELECT cuenta FROM ahorro_contrato ;"/>
+	</bean>
+	
+	
+	<bean id="capitalizarRendimientos" class="java.lang.String">
+		<constructor-arg type="java.lang.String"
+			value="select id as id, 
+				rendimiento_id as rendimientoId, 
+				tipo_id as tipoId, 
+				descripcion as descripcion,
+				cuenta_contable as cuentaContable, 
+				monto_min as montoMin, 
+				monto_max as montoMax, 
+				usuario_creacion as usuarioCreacion, 
+				fecha_creacion as fechaCreacion, 
+				usuario_modificacion as usuarioModificacion, 
+				fecha_modificacion as fechaModificacion 
+				from ahorro_capitalizar_rendimientos 
+				where id = ?">
+		</constructor-arg>
+	</bean>
+	<bean id="tazasPlazos" class="java.lang.String">
+		<constructor-arg type="java.lang.String"
+			value="select ti.id as id,
+				ti.rendimiento_id as rendimientoId,
+				ti.descripcion as descripcion,
+				ar.plazo as plazo,
+				arr.porcentaje as porcentaje, 
+				ti.canal as canal 
+				from tipos_inversion as ti 
+				join ahorro_rendimiento as ar on ar.rendimiento_id=ti.rendimiento_id 
+				join ahorro_rangos_rendimiento as arr on arr.rendimiento_id = ar.rendimiento_id 
+				where ti.canal = (select id from cat_canales cc where clave = ?)">
+		</constructor-arg>
+	</bean>
+	<bean id="tazasPlazosByCanalAndPlazo" class="java.lang.String">
+		<constructor-arg type="java.lang.String"
+			value="select ti.id as id,
+				ti.rendimiento_id as rendimientoId,
+				ti.descripcion as descripcion,
+				ar.plazo as plazo,
+				arr.porcentaje as porcentaje, 
+				ti.canal as canal 
+				from tipos_inversion as ti 
+				join ahorro_rendimiento as ar on ar.rendimiento_id=ti.rendimiento_id 
+				join ahorro_rangos_rendimiento as arr on arr.rendimiento_id = ar.rendimiento_id 
+				where ti.canal = (select id from cat_canales cc where clave = ?) and ar.plazo = ?">
+		</constructor-arg>
+	</bean>
+	
+	<bean id="obtenerInformacionTablaAhorroContrato" class="java.lang.String">
+		<constructor-arg type= "java.lang.String" 
+		value="select monto_apertura ,fecha_apertura,rendimiento_id from ahorro_contrato where cuenta = ?">
+		</constructor-arg>
+	
+	</bean>
+	
+	 <bean id="plazoReinversion" class="java.lang.String">
+        <constructor-arg type="java.lang.String"
+        value = "select plazo_reinversion 
+                from tipos_inversion as ti
+                join ahorro_rendimiento as ar on ar.rendimiento_id=ti.rendimiento_id
+                join ahorro_rangos_rendimiento as arr on arr.rendimiento_id = ar.rendimiento_id
+                where ti.canal = (select id from cat_canales cc where clave = 'ASP_PAGO')
+                 and ti.rendimiento_id = ?">
+                 </constructor-arg>
+    </bean>
+    
+    <bean id="porcentaje" class="java.lang.String">
+        <constructor-arg type="java.lang.String"
+        value = "select porcentaje
+                from tipos_inversion as ti
+                join ahorro_rendimiento as ar on ar.rendimiento_id=ti.rendimiento_id
+                join ahorro_rangos_rendimiento as arr on arr.rendimiento_id = ar.rendimiento_id
+                where ti.canal = (select id from cat_canales cc where clave = 'ASP_PAGO')
+                 and ti.rendimiento_id = ?">
+                 </constructor-arg>
+    </bean>
+    
+	
+	<bean id="ahorroContratoId" class="java.lang.String">
+        <constructor-arg type="java.lang.String"
+        value = "select ahorro_contrato_id  from ahorro_contrato ac where cuenta  = ?">
+                 </constructor-arg>
+    </bean>
+	
+	
+	
+	<bean id="InversionesDAO" class="net.cero.spring.dao.InversionesDAO">
+			<property name="jdbcTemplate" ref="jdbcTemplate" />
+			<property name="jdbcTemplatePr" ref="jdbcTemplatePr" />
+			
+			<property name="capitalizarRendimientos" ref="capitalizarRendimientos" />
+			<property name="tazasPlazos" ref="tazasPlazos" />
+			<property name="tazasPlazosByCanalAndPlazo" ref="tazasPlazosByCanalAndPlazo" />
+			
+			<property name="InsertarReinversion" ref="InsertarReinversion" />
+			<property name="sigSecAhreinversion" ref="sigSecAhreinversion" />
+			<property name="consultarRendimiento" ref="consultarRendimiento" />
+			<property name="consultarMeses" ref="consultarMeses" />
+			<property name="consultarCuentasCero" ref="consultarCuentasCero" />
+			<property name="consultarCuentasProcrea" ref="consultarCuentasProcrea" />
+			
+			<property name="obtenerInformacionTablaAhorroContrato" ref="obtenerInformacionTablaAhorroContrato" />
+			
+			<property name="plazoReinversion" ref="plazoReinversion" />
+			<property name="ahorroContratoId" ref="ahorroContratoId" />
+			<property name="porcentaje" ref="porcentaje" />
+			
+	</bean>
+	
+	
+	
+	
+	</beans>

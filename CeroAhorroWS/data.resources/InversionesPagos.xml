@@ -1,0 +1,41 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/jee 
+	http://www.springframework.org/schema/jee/spring-jee-3.0.xsd"
+	xmlns:jee="http://www.springframework.org/schema/jee">
+	
+	<bean id="consultaAhProvision" class="java.lang.String">
+        <constructor-arg type="java.lang.String"
+        value = "select * from ahorro.ahprovision_rendimientos ar where to_char(fecha_creacion,'YYYY-MM-DD') LIKE ? and estatus_activo = true ; ">
+                 </constructor-arg>
+    </bean>
+	
+	 <bean id="insertarPago" class="java.lang.String">
+    <constructor-arg type="java.lang.String"
+   		 value = "INSERT INTO AHORRO.AHPROVISION_RENDIMIENTOS ( cuenta_id, poliza, idAhorro,fecha_corte, tasa, dias,monto,fecha_creacion,usuario_creacion, estatus_activo)
+   		  VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) returning estatus_activo; "> </constructor-arg>
+        </bean>
+      <bean id="consultarDatosAhorroContrato" class="java.lang.String">
+   		<constructor-arg type="java.lang.String" value= "select ac.cuenta_padre,ac.cuenta,
+        ac.referencia from ahorro_contrato ac where ac.ahorro_contrato_id = ?;"></constructor-arg>
+  	  </bean>
+  	  
+  	<bean id="desactivarContrato" class="java.lang.String">
+    <constructor-arg type="java.lang.String" value = "update ahorro.ahprovision_rendimientos set fecha_modificacion = ?, usuario_modificacion = ?,
+	estatus_activo = false where idahorro = ? and to_char(fecha_creacion,'YYYY-MM-DD') LIKE ? returning estatus_activo;" ></constructor-arg>
+    </bean>
+  	  
+    
+  	<bean id="InversionesPagosDAO" class="net.cero.spring.dao.InversionesPagosDAO">
+  	<property name="consultarDatosAhorroContrato" ref="consultarDatosAhorroContrato"/>
+	<property name="jdbcTemplate" ref="jdbcTemplate" />
+	<property name="desactivarContrato" ref="desactivarContrato" />
+	<property name="jdbcTemplatePr" ref="jdbcTemplatePr" />
+	<property name="consultaAhProvision" ref="consultaAhProvision" />
+	<property name="insertarPago" ref="insertarPago"/>
+	</bean>
+	
+	
+	</beans>
