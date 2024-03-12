@@ -232,7 +232,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
             /*/////////////////REGISTRO DE BITACORA\\\\\\\\\\\\\\\\\\\\\\\\*/
             
 		}catch(Exception e){
-			e.printStackTrace();
+			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Deposito Transferencia Procrea ] ");
 			return null;
 		}
 		
@@ -307,7 +307,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			registraAhorroTransferencia(resultTransferenciaDeposito, resultTransferenciaDisposicion);
 			log.info("{}: Fin registro de datos del ahorroTransacciones",uuid);
 		}catch(Exception e){
-			e.printStackTrace();
+			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Transferencia ] ");
 			resp.setCodigo(-1);
 			resp.setMensaje("No se pudo rechazar el pago");
 			resp.setData("");
@@ -350,7 +350,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
             /*/////////////////REGISTRO DE BITACORA\\\\\\\\\\\\\\\\\\\\\\\\*/
             
 		}catch(Exception e){
-			e.printStackTrace();
+			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Deposito Transferencia Mi Debito ] ");
 			return null;
 		}
 		
@@ -389,7 +389,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 
 			
 		}catch(Exception e){
-			log.error(e);
+			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Disposicion Transferencia Procrea ] ");
 			return null;
 		}
 		
@@ -438,8 +438,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
             /*/////////////////REGISTRO DE BITACORA\\\\\\\\\\\\\\\\\\\\\\\\*/
 			
 		}catch(Exception e){
-			e.printStackTrace();
-			log.info("Error en procesaDisposicionTransferenciaMiDebito: " + e.getMessage());
+			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Disposicion Transferencia Mi Debito ] ");
 			return null;
 		}
 		
@@ -484,7 +483,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 				}
 			}
 		}catch(Exception e) {
-			log.info("## ALGO SALIO MAL AL REGISTRAR AHORRO TRANSFERENCIA :: " + e.getMessage(),e);
+			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ AL REGISTRAR AHORRO TRANSFERENCIA  ] ");
 		}
 		
 	}

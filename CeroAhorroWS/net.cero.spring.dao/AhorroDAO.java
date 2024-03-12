@@ -608,7 +608,6 @@ public class AhorroDAO {
 	public String getConsultarNip() {
 		return consultarNip;
 	}
-
 	public void setConsultarNip(String consultarNip) {
 		this.consultarNip = consultarNip;
 	}
@@ -620,7 +619,7 @@ public class AhorroDAO {
 			row = jdbcTemplate.queryForMap(consultarNip, tarjeta);
 			nip = (String) row.get("nip");
 		} catch(Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [Consultar Nip] ");
 			return null;
 		}
 		return nip;
@@ -634,8 +633,7 @@ public class AhorroDAO {
 			 row = jdbcTemplateSti.queryForMap(existeEnIzel, clabe);
 			 contar = (long) row.get("contar");
 		}catch(Exception e) {
-		 log.info("Error al buscar en izel");
-		 e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [Existe en Izel] ");
 		}
 		return contar;
 	}
@@ -644,12 +642,11 @@ public class AhorroDAO {
 		log.info("Telefono: " + telefono + " Clabe: " + clabe);
 		try {
 			jdbcTemplateSti.update(updateTelefonoIzel, telefono, clabe);
-			//jdbcTemplateSti.getDataSource().getConnection().commit();
 		}catch(Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [Update Telefono Izel ] ");
 		}
 	}
-	
+	 
 	public Integer tipo_cuenta(String cuenta){
 		List<Map<String,Object>> rows;
 		try{
@@ -660,8 +657,7 @@ public class AhorroDAO {
 			else
 				return 0;
 		}catch(Exception e){
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [Tipo Cuenta] ");
 		}
 		return 0;
 	}
@@ -678,10 +674,11 @@ public class AhorroDAO {
 	    	
 	        if (e instanceof ConnectException || e instanceof CannotGetJdbcConnectionException
 	        		|| e instanceof PSQLException ) {
-	        	log.error(e.getMessage());
+	        	
+	        	log.error("Error " + " [ AhorroDAO] " + " [Tipo Cuenta Cero] ");
 	            return 1;
 	        }else {
-	        	log.error(e.getMessage());
+	        	log.error("Error " + " [ AhorroDAO] " + " [Tipo Cuenta Cero ] ");
 	            return 3;
 	        }
 	        
@@ -693,8 +690,7 @@ public class AhorroDAO {
 			cuenta = (long)jdbcTemplatePr.queryForObject(obtenerCuenta, new Object[] { solicitante_id }, long.class);
 			return cuenta;
 		}catch(Exception e){
-			log.error(e.getMessage());
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [Existe en procrea ] ");
 		}
 		return 0;
 	}
@@ -913,8 +909,7 @@ public class AhorroDAO {
 			}
 
 		} catch (EmptyResultDataAccessException e) {
-			e.printStackTrace();
-			log.info("No se encontró una CLABE asignada a la cuenta");
+			log.error("Error " + " [ AhorroDAO] " + " [ Buscar Ahorro Procrea Clabe Cuenta] ");
 			return "";
 		}
 		return obj;
@@ -932,8 +927,7 @@ public class AhorroDAO {
 			}
 
 		} catch (EmptyResultDataAccessException e) {
-			e.printStackTrace();
-			log.info("No se encontró una CLABE asignada a la cuenta");
+			log.error("Error " + " [ AhorroDAO] " + " [ Buscar Ahorro Cero Clabe Cuenta] ");
 			return "";
 		}
 		return obj;
@@ -960,7 +954,7 @@ public class AhorroDAO {
 			}
 
 		} catch (EmptyResultDataAccessException e) {
-			log.info("No se encontró una tarjeta de debito asignada a la cuenta");
+			log.error("Error " + " [ AhorroDAO ] " + " [ Buscar Tarjeta Debito ] ");
 		}
 
 		return obj;
@@ -1116,9 +1110,9 @@ public class AhorroDAO {
 		try {
 			return jdbcTemplatePr.queryForObject(obtenerSecuenciaCuenta, String.class);
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.info(e);
-			return e.getMessage();
+			log.error("Error " + " [ AhorroDAO] " + " [Obtener Secuencia Cuenta ] ");
+			String error = "Error Ahorro DAO obtener Secuencia Cuenta";
+			return error;
 		}
 	}
 	
@@ -1247,9 +1241,7 @@ public class AhorroDAO {
 			}
 
 		} catch (EmptyResultDataAccessException e) {
-			log.info("Error en insertaRegistroAhorro");
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Inserta Registro Ahorro ] ");
 		}
 
 		return result;
@@ -1262,7 +1254,7 @@ public class AhorroDAO {
 			return jdbcTemplatePr.queryForObject(obtenerCuentaContable, new Object[] { rendimientoId, productoId },
 					String.class);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [Obtener Cuenta Contable ] ");
 			return "";
 		}
 	}
@@ -1271,7 +1263,7 @@ public class AhorroDAO {
 		try {
 			return jdbcTemplatePr.queryForObject(obtenerSecuenciaContrato, String.class);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [Obtener Secuencia Contrato ] ");
 			return "";
 		}
 	}
@@ -1290,8 +1282,7 @@ public class AhorroDAO {
 				}
 			}
 		}catch(Exception e){
-			log.error(e.getMessage());
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Get Conceptos Pld ] ");
 		}
 		return lista;
 	}
@@ -1314,8 +1305,7 @@ public class AhorroDAO {
 			}
 		}
 		catch(Exception e){
-			log.error(e.getMessage());
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Get Info Cuenta ] ");
 		}
 		return c;
 	}
@@ -1333,8 +1323,7 @@ public class AhorroDAO {
 			}
 		}
 		catch(Exception e){
-			log.error(e.getMessage());
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Get Info Solicitante ] ");
 		}
 		return s;
 	}
@@ -1343,7 +1332,7 @@ public class AhorroDAO {
 			return jdbcTemplatePr.queryForObject(ahorroGeneraReferencia, new Object[] { cuenta, usuarioId, sucursal },
 					String.class);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Ahorro Genera Referencia ] ");
 			return "";
 		}
 	}
@@ -1369,7 +1358,7 @@ public class AhorroDAO {
 			}
 
 		} catch (EmptyResultDataAccessException e) {
-			log.error(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Buscar Cuentas X Cliente ] ");
 		}
 
 		return result;
@@ -1479,7 +1468,7 @@ public class AhorroDAO {
 					a.getNumBloqueo(), a.getRequiereIdentificador(), a.getRespaldoMd5());
 			return a.getAhorroContratoId();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Nuevo Ahorro Contrato ] ");
 			return 0;
 		}
 	}
@@ -1488,7 +1477,7 @@ public class AhorroDAO {
 		try {
 			return jdbcTemplatePr.queryForObject(sigSecAhorroContrato, Integer.class);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Sig Sec Ahorro Contrato ] ");
 			return 0;
 		}
 	}
@@ -1499,7 +1488,7 @@ public class AhorroDAO {
 			return jdbcTemplatePr.queryForObject(ahorroCopiaRendimientos,
 					new Object[] { cuenta, rendimientoId, interes, usuarioId, montoApertuta }, String.class);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Ahorro Copia Rendimientos ] ");;
 			return "ERROR";
 		}
 	}
@@ -1508,8 +1497,7 @@ public class AhorroDAO {
 		try {
 			jdbcTemplatePr.update(actualizaAhorroRendimientosVigntes, usuarioId, tipoCapitalizarId, cuenta);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Actualiza Ahorro Rendimientos Vigentes  ] ");
 		}
 	}
 
@@ -1518,7 +1506,7 @@ public class AhorroDAO {
 			jdbcTemplatePr.update(actualizaCuentaClabe, ahorroContrato.getCuentaClabe(),
 					ahorroContrato.getAhorroContratoId());
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Actualiza Cuenta Clabe ] ");
 			return null;
 		}
 
@@ -1529,7 +1517,7 @@ public class AhorroDAO {
 		try {
 			return jdbcTemplatePr.queryForObject(calculoGatByCuenta, new Object[] { cuenta }, Double.class);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Calculo Gat By Cuenta ] ");
 			return (double) 0;
 		}
 	}
@@ -1538,7 +1526,7 @@ public class AhorroDAO {
 		try {
 			jdbcTemplatePr.update(actualizaGatAhorroContrato, gat, cuenta);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Actualiza Gat Ahorro COntrato ] ");
 		}
 	}
 
@@ -1546,7 +1534,7 @@ public class AhorroDAO {
 		try {
 			jdbcTemplatePr.update(borraAhorroContrato, ahorroContratoId);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Borrar Ahorro Contrato ] ");
 		}
 	}
 
@@ -1559,7 +1547,7 @@ public class AhorroDAO {
 					String.class);
 			return accesoId;
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Genera Tarjeta Ahorro ] ");
 			return 0;
 		}
 	}
@@ -1573,8 +1561,7 @@ public class AhorroDAO {
 			else 
 				return "";
 		}catch(Exception e){
-			e.printStackTrace();
-			log.info("Error al buscar el contrato de la cuenta: "+e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Obtener Contrato Ahorro ] ");
 		}
 		return "";
 	}
@@ -1582,7 +1569,7 @@ public class AhorroDAO {
 		try {
 			return jdbcTemplatePr.queryForObject(sigSecAcceso, Integer.class);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Sig sec Acceso ] ");
 			return 0;
 		}
 	}
@@ -1629,7 +1616,7 @@ public class AhorroDAO {
 				return null;
 			}
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Leer Saldo Actual By Cuenta DAO ] ");
 			return null;
 		}
 		return saldos;
@@ -1659,7 +1646,7 @@ public class AhorroDAO {
 			}
 
 		} catch (EmptyResultDataAccessException e) {
-
+			log.error("Error " + " [ AhorroDAO] " + " [ Buscar Tazas Rendimiento ] ");
 		}
 
 		return list;
@@ -1672,8 +1659,7 @@ public class AhorroDAO {
 			rows = jdbcTemplate.queryForMap(buscarCuentaCero,cuenta);
 			cont =(long)rows.get("count");
 		} catch (Exception e) {
-			log.error(e.getMessage());
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Buscar Cuenta En cero ] ");
 		}
 		return cont;
 	}
@@ -1691,7 +1677,7 @@ public class AhorroDAO {
 				return null;			
 				}
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Leer Saldo By cuenta by Fecha Dao ] ");
 			return null;
 		}
 		return respuesta;
@@ -1701,7 +1687,7 @@ public class AhorroDAO {
 		try {
 			jdbcTemplate.update(actualizarEstatusPan, estatus, pan);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			log.error("Error " + " [ AhorroDAO] " + " [ Actualizar Estatus Pan ] ");
 		}
 	}
 	
@@ -1714,8 +1700,7 @@ public class AhorroDAO {
 				cuenta_id = (int)row.get(0).get("id");
 			}
 		}catch(Exception e){
-			log.error(e.getMessage());
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Obtener Id Cuenta Ahorro ] ");
 		}
 		return cuenta_id;
 	}
@@ -1728,8 +1713,7 @@ public class AhorroDAO {
 				moneda = (int)row.get("moneda_id");
 			}
 		}catch(Exception e){
-			log.error(e);
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Get Moneda ] ");
 		}
 		return moneda;
 	}
@@ -1745,8 +1729,7 @@ public class AhorroDAO {
 				ac.setMonedaId((int)row.get("moneda_id"));
 			}
 		}catch(Exception e){
-			log.error(e);
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Obtener Info De Cuenta ] ");
 		}
 		return ac;
 	}
@@ -1799,8 +1782,7 @@ public class AhorroDAO {
 			}
 		}
 		catch(Exception e){
-			log.error(e.getMessage());
-			e.printStackTrace();
+			log.error("Error " + " [ AhorroDAO] " + " [ Insertar Datos en Ahorro Contrato ] ");
 		}
 		
 		return ahorro_contrato_id;

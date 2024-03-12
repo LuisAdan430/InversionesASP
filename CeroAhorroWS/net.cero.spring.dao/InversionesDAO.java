@@ -36,8 +36,7 @@ public class InversionesDAO {
 		try {
 			contratoId = jdbcTemplatePr.queryForObject(ahorroContratoId,Integer.class,cuenta);
 		}catch(Exception e) {
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ Ahorro Contrato Id ] ");
 		}
 		return contratoId;
 	}
@@ -46,8 +45,7 @@ public class InversionesDAO {
 		try {
 			plazoReinversionV = jdbcTemplatePr.queryForObject(plazoReinversion,Integer.class,rendimientoId);
 		}catch(Exception e) {
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ Plazo Reinversion M ] ");
 		}
 		return  plazoReinversionV;
 	}
@@ -60,8 +58,7 @@ public class InversionesDAO {
 							new BeanPropertyRowMapper<ObtenerInfoAhorroContrato>(ObtenerInfoAhorroContrato.class));
 			return infoTablaAhorroContrato;		
 		}catch(Exception e) {
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ Ahorro Contrato ] ");
 		}
 		return null;
 		
@@ -79,7 +76,7 @@ public class InversionesDAO {
 			return tazasPlazosList;
 			
 		} catch (Exception ex) {
-			log.error(ex.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ Obtener Tazas Plazos By Canal And Plazo ] ");
 		}
 		
 		return null;
@@ -95,8 +92,7 @@ public class InversionesDAO {
 		try {
 			porcentajeReturn = jdbcTemplatePr.queryForObject(porcentaje,Double.class,rendimientoId);
 		}catch(Exception e) {
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ Porcentaje DAO ] ");
 		}
 		return  porcentajeReturn;
 	}
@@ -113,7 +109,7 @@ public class InversionesDAO {
 			return tazasPlazosList;
 			
 		} catch (Exception ex) {
-			log.error(ex.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ Obtener Tazas Plazos ] ");
 		}
 		
 		return null;
@@ -141,7 +137,7 @@ public class InversionesDAO {
 							new BeanPropertyRowMapper<CapitalizarRendimientosOBJ>(CapitalizarRendimientosOBJ.class));
 			
 		} catch (Exception ex) {
-			log.error(ex.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ Obtener Capitalizar Rendimientos OBJ ] ");
 		}
 		
 		return capitalizarRendimientosObjList;
@@ -173,7 +169,7 @@ public class InversionesDAO {
 		try {
 			return jdbcTemplatePr.queryForObject(sigSecAhreinversion, Integer.class);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ InversionesDAO ] " + " [ Sig Sec AhReinversion ] ");
 			return 0;
 		}
 	}
@@ -184,9 +180,7 @@ public class InversionesDAO {
 			resultado = jdbcTemplatePr.queryForObject(consultarRendimiento, Float.class,idRendimiento);
 		
 		} catch (EmptyResultDataAccessException e) {
-			log.info("Error al consultar rendimiento");
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ consultar Rendimiento ] ");
 		}
 		return resultado;
 		
@@ -197,9 +191,7 @@ public class InversionesDAO {
 			resultado = jdbcTemplatePr.queryForObject(consultarMeses, Integer.class,idRendimiento);
 		
 		} catch (EmptyResultDataAccessException e) {
-			log.info("Error al consultar meses");
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ consultar Meses  ] ");
 		}
 		return resultado;
 		
@@ -219,9 +211,7 @@ public class InversionesDAO {
 			
 			
 		} catch (EmptyResultDataAccessException e) {
-			log.info("Error al ingresar la reinversion");
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ InversionesDAO ] " + " [ Insertar Reinversion ] ");
 		}
 		
 		

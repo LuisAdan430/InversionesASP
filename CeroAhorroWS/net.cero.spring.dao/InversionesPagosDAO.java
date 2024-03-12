@@ -54,8 +54,7 @@ public class InversionesPagosDAO {
 			}
 			return infoPagos;
 		}catch(Exception e) {
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ Inversiones Pagos DAO ] " + " [ pagos Hoy ] ");
 			return null;
 		}
 	}
@@ -75,8 +74,7 @@ public class InversionesPagosDAO {
 			 infoAhorroContrato.add(referencia);
 			 return infoAhorroContrato;
 		 }catch(Exception e) {
-			 e.printStackTrace();
-			 log.error(e.getLocalizedMessage());
+			 log.error("Error " + " [ Inversiones Pagos DAO ] " + " [ Informacion Ahorro Contrato ] ");
 			 return null;
 		 }
 	}
@@ -101,9 +99,7 @@ public class InversionesPagosDAO {
 			*/
 			return resultados;
 		}catch(EmptyResultDataAccessException e) {
-			log.error("Error al desactivar el pago");
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ Inversiones Pagos DAO ] " + " [ Editar Pagos ] ");
 			return null;
 		}
 	}
@@ -116,9 +112,7 @@ public class InversionesPagosDAO {
 			return respuesta;
 			
 		}catch(EmptyResultDataAccessException e) {
-			log.error("Error al ingresar la inversion");
-			e.printStackTrace();
-			log.error(e.getMessage());
+			log.error("Error " + " [ Inversiones Pagos DAO ] " + " [ Insertar Pagos ] ");
 			return respuesta;
 		}
 		

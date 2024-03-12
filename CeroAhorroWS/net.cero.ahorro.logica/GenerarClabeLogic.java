@@ -96,7 +96,7 @@ public class GenerarClabeLogic {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ Generar Clabe Logic ] " + " [ Generar Clabe ] ");
 		}
 		return clabe;
 	}

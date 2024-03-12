@@ -126,12 +126,17 @@ public class InversionesLogic {
 		}
 	}
 
-	private File convertMultiPartToFile(MultipartFile file) throws IOException {
-		File convFile = new File(file.getName());
-		FileOutputStream fos = new FileOutputStream(convFile);
-		fos.write(file.getBytes());
-		fos.close();
-		return convFile;
+	private File convertMultiPartToFile(MultipartFile file) {
+		try {
+			File convFile = new File(file.getName());
+			FileOutputStream fos = new FileOutputStream(convFile);
+			fos.write(file.getBytes());
+			fos.close();
+			return convFile;
+		}catch(Exception e) {
+			log.error("Error " + " [ Inversiones Logic ] " + " [ convert Multi Part To File ] ");
+		}
+		return null;
 	}
 
 	public Respuesta crearInversion(String nombreEndpoint, String sessionId, NuevaInversionReq req) {
@@ -401,8 +406,7 @@ public class InversionesLogic {
 								return respuesta;
 							}
 						} catch (Exception e) {
-							log.error("error en: " + e.getMessage());
-							e.printStackTrace();
+							log.error("Error " + " [ AhorroDAO] " + " [ Crear Inversion] ");
 							respuesta.setCodigo(-2);
 							respuesta.setMensaje("Error de comunicacion 1");
 							return respuesta;
@@ -417,8 +421,7 @@ public class InversionesLogic {
 					return rsp;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
-				log.error("Error al Crear la Cuenta de Inversion: " + e.getMessage());
+				log.error("Error " + " [ Inversiones Logic] " + " [ Crear la cuenta de Inversion] ");
 				resp.setCodigo(-2);
 				resp.setMensaje("Error de comunicacion 2 "+e.getMessage());
 				return resp;
@@ -696,8 +699,7 @@ public class InversionesLogic {
 					ahorroId, sucursalApertura);
 			return cuentaClabe;
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.error("Error al generar la clabe de la cuenta");
+			log.error("Error " + " [ Inversiones Logic]" + " [ Genera Cuenta Clabe] ");
 			return null;
 		}
 	}
@@ -713,8 +715,7 @@ public class InversionesLogic {
 					ConceptosUtil.CLAVE_CONCEPTO_DATOS_CUENTA, ConceptosUtil.ESTATUS_CONCEPTO_DATOS_CUENTA);
 			saldo = midebitologic.consultaSaldoAhorroMiDebito(miDebito);
 		}catch(Exception e) {
-			log.error("Error al consultar el saldo");
-			e.printStackTrace();
+			log.error("Error " + " [ Inversiones Logic] " + " [ Error al consultar el saldo ] ");
 		}
 		return new BigDecimal(saldo.doubleValue());
 	}

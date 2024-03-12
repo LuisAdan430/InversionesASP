@@ -1,4 +1,3 @@
-
 package net.cero.ahorro.logica;
 
 import java.math.BigDecimal;
@@ -284,9 +283,7 @@ public class InversionesASPLogic {
 			}
 			return true;
 		}catch(Exception e) {
-			log.error(e.getMessage());
-			log.error(e.getCause());
-			log.error(e.getStackTrace());
+			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Pagos Mensuales  ] ");
 			return false;
 		}
 		
@@ -300,7 +297,7 @@ public class InversionesASPLogic {
 			tazasPlazosOBJ = invdao.obtenerTazasPlazosByCanalAndPlazo(canal, plazo);
 			return tazasPlazosOBJ;
 		} catch (Exception ex) {
-			log.error(ex.getMessage());
+			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Obtener Tazas Plazos By Canal And Plazo ] ");
 		}
 		
 		return tazasPlazosOBJ;
@@ -520,8 +517,7 @@ public class InversionesASPLogic {
 				saldo = miDebitoLogic.consultaSaldoAhorroMiDebito(miDebito);
 			}
 		}catch(Exception e) {
-			log.error("Error al consultar el saldo");
-			e.printStackTrace();
+			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Obtener Saldo ] ");
 		}
 		return new BigDecimal(saldo.doubleValue());
 	}
@@ -616,7 +612,7 @@ public class InversionesASPLogic {
 		try {
 			capitalizarRendimientosObjList = invdao.obtenerCapitalizarRendimientosOBJ(id);
 		} catch (Exception ex) {
-			log.error(ex.getMessage());
+			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Capitalizar Rendimientos ] ");
 		}
 		
 		return capitalizarRendimientosObjList;
@@ -635,7 +631,7 @@ public class InversionesASPLogic {
 					ahorroId, sucursalApertura);
 			return cuentaClabe;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Genera Cuenta Clabe ] ");
 			log.error(ConstantesInversiones.ERROR_GENERAR_CLAVE_CUENTA);
 			return null;
 		}
@@ -853,7 +849,7 @@ public class InversionesASPLogic {
 			List<TazasPlazosOBJ> tazasPlazosOBJ = invdao.obtenerTazasPlazos(canal);
 			return tazasPlazosOBJ;
 		} catch (Exception ex) {
-			log.error(ex.getMessage());
+			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Obtener Tazas Plazos ] ");
 		}
 		
 		return null;

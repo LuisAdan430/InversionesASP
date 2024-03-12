@@ -75,7 +75,7 @@ public class MiDebitoLogic {
 				wsdl = new URL(ObtenerSaldoIfzService.WSDL_LOCATION.toString().replace("localhost",  ConstantesUtil.SERVICIO_BASE_PLASTICOS));
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Error " + " [ Mi Debito Logic ] " + " [ Consultar URL obtener Saldo Ifz Service ] ");
 			}
 			ObtenerSaldoIfzService service1 = new ObtenerSaldoIfzService(wsdl);
 			ObtenerSaldoIfz port1 = service1.getObtenerSaldoIfzPort();
@@ -119,7 +119,7 @@ public class MiDebitoLogic {
 				///////////////temporal para pruebas
 			}
 		}catch(Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito Con Plastico ] ");
 		}
 		return saldoDisponible;
 	}
@@ -142,7 +142,7 @@ public class MiDebitoLogic {
 				saldoDisponible = consultaSaldoAhorroMiDebitoSinPlastico(miDebito.getCuenta());
 			}
 		}catch(Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito ] ");
 		}
 		return saldoDisponible;
 	}
@@ -159,7 +159,8 @@ public class MiDebitoLogic {
 			}
 			
 		}catch(Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito Sin Plastico ] ");
+
 		}
 		return saldoDisponible;
 	}
@@ -171,7 +172,7 @@ public class MiDebitoLogic {
 				wsdl = new URL(ObtenerSaldoIfzService.WSDL_LOCATION.toString().replace("localhost", ""));
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Error " + " [ Mi Debito Logic ] " + " [ Obtener Saldo Ifz Service ] ");
 			}
 			ObtenerSaldoIfzService service1 = new ObtenerSaldoIfzService(wsdl);
 			ObtenerSaldoIfz port1 = service1.getObtenerSaldoIfzPort();
@@ -215,7 +216,7 @@ public class MiDebitoLogic {
 				///////////////temporal para pruebas
 			}
 		}catch(Exception e) {
-			e.printStackTrace();
+			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito ] ");
 		}
 		return saldoDisponible;
 	}
@@ -413,7 +414,7 @@ public class MiDebitoLogic {
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito Con Plastico Cacao ] ");
 		}
 		
 		return saldo;
