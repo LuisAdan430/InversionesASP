@@ -229,7 +229,7 @@ public class MiDebitoLogic {
 
 		log.info("{}: depositarAhorro ws:{}",uuidGlobal,HOST);
 		Gson gson = new Gson();
-		String auth = Credentials.basic("ASP", "a5p2017$");
+		String auth = Credentials.basic(ConstantesUtil.USER, ConstantesUtil.PASSWORD);
 		MediaType media = MediaType.parse("application/json; charset=utf-8");
 
 		Map<String, Object> map = new HashMap<>();
@@ -304,7 +304,7 @@ public class MiDebitoLogic {
 		String HOST = "http://localhost:8080/CEROAhorroWS/rest/retirarAhorro";
 		//log.info("{}: retirarMiDebito ws:{}",uuidGlobal,HOST);
 		Gson gson = new Gson();
-		String auth = Credentials.basic("ASP", "a5p2017$");
+		String auth = Credentials.basic(ConstantesUtil.USER, ConstantesUtil.PASSWORD);
 		MediaType media = MediaType.parse("application/json; charset=utf-8");
 
 		Map<String, Object> map = new HashMap<>();
@@ -392,7 +392,7 @@ public class MiDebitoLogic {
 		entrada.setToken("");
 		MediaType media = MediaType.parse("application/json; charset=utf-8");
 		OkHttpClient cliente = new OkHttpClient();
-		String auth = Credentials.basic("ASP", "a5p2017$");
+		String auth = Credentials.basic(ConstantesUtil.USER, ConstantesUtil.PASSWORD);
 		String url =ConstantesUtil.WS_ADMIN_PLA + "/consultar-tarjeta";
 		String body = gson.toJson(entrada);
 		Request request = new Request.Builder().header("Authorization", auth).url(url).post(okhttp3.RequestBody.create(media, body)).build();

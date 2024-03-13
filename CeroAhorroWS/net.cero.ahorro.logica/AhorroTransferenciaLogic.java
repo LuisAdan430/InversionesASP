@@ -335,7 +335,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			reqTra.setReferenciaNumerica(generaReferencia());
 			MediaType media = MediaType.parse("application/json; charset=utf-8");
 			OkHttpClient cliente = new OkHttpClient();
-			String auth = Credentials.basic("ASP", "a5p2017$");
+			String auth = Credentials.basic(ConstantesUtil.USER, ConstantesUtil.PASSWORD);
 			String url = ConstantesUtil.WS_ADMIN_PLA + "/fondearTarjetaOrquestador";
 			String body = objectMapper.writeValueAsString(reqTra);
 			Request request = new Request.Builder().header("Authorization", auth).url(url).post(okhttp3.RequestBody.create(media, body)).build();
@@ -419,7 +419,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			reqTra.setReferenciaNumerica(generaReferencia());
 			MediaType media = MediaType.parse("application/json; charset=utf-8");
 			OkHttpClient cliente = new OkHttpClient();
-			String auth = Credentials.basic("ASP", "a5p2017$");
+			String auth = Credentials.basic(ConstantesUtil.USER, ConstantesUtil.PASSWORD);
 			String url = ConstantesUtil.WS_ADMIN_PLA + "/retirarTarjetaOrquestador";
 			String body = objectMapper.writeValueAsString(reqTra);
 			log.info("Request para retirarTarjetaOrquestador:: " + body);

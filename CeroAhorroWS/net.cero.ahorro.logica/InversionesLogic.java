@@ -349,7 +349,7 @@ public class InversionesLogic {
 							i++;
 						}
 						try {
-							String auth = Credentials.basic("ASP", "a5p2017$");
+							String auth = Credentials.basic(ConstantesUtil.USER, ConstantesUtil.PASSWORD);
 							Builder builder = new Builder();
 							builder.setType(MultipartBody.FORM);
 							for (i = 0; i < expediente.length; i++) {

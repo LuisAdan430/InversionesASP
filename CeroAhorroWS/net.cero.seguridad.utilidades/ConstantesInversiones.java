@@ -16,17 +16,12 @@ public class ConstantesInversiones {
 	public static final String EXITO_PASO_A_LOGICA = "Exito ha pasado a la logica sin errores";
 	public static final String EXITO_PASO_LAS_VALIDACIONES = "Exito ha pasado las validaciones";
 	public static final String CUENTA_ORIGINAL = " [ Cuenta Original ] ";
-	public static final String ID_SOLICITANTE = " [ Id Solicitante ] ";
 	public static final String TIPO_INVERSION = " [ Tipo Inversion ] ";
-	public static final String ID_RENDIMIENTO = " [ Id Rendimiento ] ";
 	public static final String MONTO = " [ Monto ] ";
 	public static final String NOMBRE_INVERSION = " [ Nombre Inversion ] ";
 	public static final String CUENTA = " [ Cuenta ] ";
 	public static final String DESCRIPCION = " [ Descripcion ] ";
 	public static final String CANAL = " [ Canal ] ";
-	public static final String AHORRO_CONTRATO_ID = " [ Ahorro Contrato Id ] ";
-	public static final String RENDIMIENTO_ID = " [ Rendimiento Id ] ";
-	public static final String TIPO_CAPITALIZAR_ID = " [ Tipo Capitalizar Id ] ";
 	public static final String AH_TIPO_REINVERSION = " [ Ah Tipo Reinversion ] ";
 	
 	public static final String CANAL_ASP_PAGO = "ASP_PAGO";
