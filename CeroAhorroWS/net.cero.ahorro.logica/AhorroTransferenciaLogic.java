@@ -12,7 +12,8 @@ import net.cero.ahorro.ws.util.LogWsUtil;
 import net.cero.spring.dao.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.google.gson.Gson;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.cero.data.AhorroContrato;
 import net.cero.data.AhorroContratoOBJ;
@@ -56,7 +57,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 	private static AhorroTransferenciasDAO atdao;
 	private static CajaDepositoAhorroLogic cajaDepositoAhorroLogic;
 	private static CajaDisposicionAhorroLogic cajaDisposicionAhorroLogic;
-	private static Gson gson;
+	private static ObjectMapper objectMapper;
 	private static MiDebitoLogic miDebitoLogic;
 
 	private static void initialized() {
@@ -79,7 +80,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			cajaDepositoAhorroLogic = new CajaDepositoAhorroLogic();
 			cajaDisposicionAhorroLogic = new CajaDisposicionAhorroLogic();
 			miDebitoLogic = new MiDebitoLogic();
-			gson = new Gson();
+			objectMapper = new ObjectMapper();
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
@@ -336,10 +337,11 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			OkHttpClient cliente = new OkHttpClient();
 			String auth = Credentials.basic("ASP", "a5p2017$");
 			String url = ConstantesUtil.WS_ADMIN_PLA + "/fondearTarjetaOrquestador";
-			String body = gson.toJson(reqTra);
+			String body = objectMapper.writeValueAsString(reqTra);
 			Request request = new Request.Builder().header("Authorization", auth).url(url).post(okhttp3.RequestBody.create(media, body)).build();
 			Response response = cliente.newCall(request).execute();
-			resultTransferenciaDeposito = gson.fromJson(response.body().string(), Respuesta.class);
+			
+			resultTransferenciaDeposito = objectMapper.readValue(response.body().string(), Respuesta.class);
 		//	resultTransferenciaDeposito = miDebitoLogic.depositoMiDebito(req.getCuentaDestino(),req.getMonto());
 			
 			/*resultTransferenciaDeposito.setCodigo(0);
@@ -419,11 +421,11 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			OkHttpClient cliente = new OkHttpClient();
 			String auth = Credentials.basic("ASP", "a5p2017$");
 			String url = ConstantesUtil.WS_ADMIN_PLA + "/retirarTarjetaOrquestador";
-			String body = gson.toJson(reqTra);
+			String body = objectMapper.writeValueAsString(reqTra);
 			log.info("Request para retirarTarjetaOrquestador:: " + body);
 			Request request = new Request.Builder().header("Authorization", auth).url(url).post(okhttp3.RequestBody.create(media, body)).build();
 			String respuesta = cliente.newCall(request).execute().body().string();
-			resultTransferenciaDisposicion = gson.fromJson(respuesta, Respuesta.class);
+			resultTransferenciaDisposicion = objectMapper.readValue(respuesta, Respuesta.class);
 			if (Integer.valueOf(resultTransferenciaDisposicion.getCodigo()) == null) {
 				return null;
 			}
@@ -453,9 +455,10 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 				if(!resultTransferenciaDeposito.isEmpty()) {
 					if(resultTransferenciaDisposicion != null) {
 						if(!resultTransferenciaDisposicion.isEmpty()){
-							movimientoCajaDeposito = gson.fromJson(resultTransferenciaDeposito, AhorroTransferenciaOBJ.class);
+							String jsonString = resultTransferenciaDeposito;
 							
-							movimientoCajaDisposicion = gson.fromJson(resultTransferenciaDisposicion, AhorroTransferenciaOBJ.class);
+							movimientoCajaDeposito = objectMapper.readValue(jsonString , AhorroTransferenciaOBJ.class);
+							movimientoCajaDisposicion = objectMapper.readValue(resultTransferenciaDisposicion, AhorroTransferenciaOBJ.class);
 							
 							if(movimientoCajaDeposito != null) {
 								if(movimientoCajaDisposicion != null) {
@@ -471,7 +474,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 									ahorroTransferencia.setDisposicionId(movimientoCajaDisposicion.getDisposicionId());
 									ahorroTransferencia.setDepositoId(movimientoCajaDeposito.getDepositoId());
 									
-									log.info("## DATOS DE TRANSFERENCIA A INSERTAR :: " + gson.toJson(ahorroTransferencia));
+									log.info("## DATOS DE TRANSFERENCIA A INSERTAR :: " + objectMapper.writeValueAsString(ahorroTransferencia));
 									ahorroTransferencia.setId(atdao.nuevoAT(ahorroTransferencia));
 									if(ahorroTransferencia.getId() > 0) {
 										log.info("## TRANSFERENCIA REGISTRADA");
