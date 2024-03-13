@@ -384,7 +384,7 @@ public class MiDebitoLogic {
 		header.setIdCanalAtencion(2L);
 		header.setIdSucursal(1L);
 		header.setIdUsuario(9L);
-		header.setIpHost("172.17.8.21");
+		header.setIpHost(ConstantesUtil.consultaSaldoIp);
 		header.setIdTransaccion(2);
 		entrada.setHeader(header);
 		entrada.setTipoTarjeta(tipoTarjeta);
