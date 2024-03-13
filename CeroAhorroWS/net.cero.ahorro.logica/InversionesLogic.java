@@ -127,16 +127,24 @@ public class InversionesLogic {
 	}
 
 	private File convertMultiPartToFile(MultipartFile file) {
-		try {
-			File convFile = new File(file.getName());
-			FileOutputStream fos = new FileOutputStream(convFile);
-			fos.write(file.getBytes());
-			fos.close();
-			return convFile;
-		}catch(Exception e) {
-			log.error("Error " + " [ Inversiones Logic ] " + " [ convert Multi Part To File ] ");
-		}
-		return null;
+	    FileOutputStream fos = null;
+	    try {
+	        File convFile = new File(file.getName());
+	        fos = new FileOutputStream(convFile);
+	        fos.write(file.getBytes());
+	        return convFile;
+	    } catch (Exception e) {
+	        log.error("Error [ Inversiones Logic ] [ convert Multi Part To File ] ");
+	    } finally {
+	        try {
+	            if (fos != null) {
+	                fos.close();
+	            }
+	        } catch (IOException e) {
+	            log.error("Error al cerrar el FileOutputStream", e);
+	        }
+	    }
+	    return null;
 	}
 
 	public Respuesta crearInversion(String nombreEndpoint, String sessionId, NuevaInversionReq req) {
@@ -421,7 +429,7 @@ public class InversionesLogic {
 					return rsp;
 				}
 			} catch (Exception e) {
-				log.error("Error " + " [ Inversiones Logic] " + " [ Crear la cuenta de Inversion] ");
+				log.error("Error " + " [ AhorroDAO] " + " [ Crear la cuenta de Inversion] ");
 				resp.setCodigo(-2);
 				resp.setMensaje("Error de comunicacion 2 "+e.getMessage());
 				return resp;
@@ -699,7 +707,7 @@ public class InversionesLogic {
 					ahorroId, sucursalApertura);
 			return cuentaClabe;
 		} catch (Exception e) {
-			log.error("Error " + " [ Inversiones Logic]" + " [ Genera Cuenta Clabe] ");
+			log.error("Error " + " [ AhorroDAO] " + " [ Genera Cuenta Clabe] ");
 			return null;
 		}
 	}
@@ -715,7 +723,7 @@ public class InversionesLogic {
 					ConceptosUtil.CLAVE_CONCEPTO_DATOS_CUENTA, ConceptosUtil.ESTATUS_CONCEPTO_DATOS_CUENTA);
 			saldo = midebitologic.consultaSaldoAhorroMiDebito(miDebito);
 		}catch(Exception e) {
-			log.error("Error " + " [ Inversiones Logic] " + " [ Error al consultar el saldo ] ");
+			log.error("Error " + " [ AhorroDAO] " + " [ Error al consultar el saldo ] ");
 		}
 		return new BigDecimal(saldo.doubleValue());
 	}
