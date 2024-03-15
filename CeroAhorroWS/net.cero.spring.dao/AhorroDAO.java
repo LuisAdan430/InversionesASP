@@ -620,8 +620,8 @@ public class AhorroDAO {
 	        row = jdbcTemplate.queryForMap(consultarNip, tarjeta);
 	        nip = (String) row.get("nip");
 	    } catch (DataAccessException e) {
-	        log.error("Error al consultar el NIP: " + e.getMessage());
-	        throw new RuntimeException("Error al consultar el NIP", e);
+	        log.error("Error al consultar el NIP [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al consultar el NIP [ AhorroDAO ] ", e);
 	    }
 	    return nip;
 	}
@@ -632,9 +632,10 @@ public class AhorroDAO {
 		try {
 			 row = jdbcTemplateSti.queryForMap(existeEnIzel, clabe);
 			 contar = (long) row.get("contar");
-		}catch(Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [Existe en Izel] ");
-		}
+		} catch (DataAccessException e) {
+	        log.error("Error al consultar la existencia en Izel [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al consultar la existencia en Izel [ AhorroDAO ] ", e);
+	    }
 		return contar;
 	}
 	
@@ -642,9 +643,10 @@ public class AhorroDAO {
 		log.info("Telefono: " + telefono + " Clabe: " + clabe);
 		try {
 			jdbcTemplateSti.update(updateTelefonoIzel, telefono, clabe);
-		}catch(Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [Update Telefono Izel ] ");
-		}
+		} catch (DataAccessException e) {
+	        log.error("Error al actualizar el telefono en Izel [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al actualizar el telefono en Izel [ AhorroDAO ] ", e);
+	    }
 	}
 	 
 	public Integer tipo_cuenta(String cuenta){
@@ -656,10 +658,10 @@ public class AhorroDAO {
 			}
 			else
 				return 0;
-		}catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [Tipo Cuenta] ");
-		}
-		return 0;
+		} catch (DataAccessException e) {
+	        log.error("Error al consultar el tipo cuenta [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al consultar el tipo cuenta [ AhorroDAO ] ", e);
+	    }
 	}
 	public Integer tipoCuentaCero(String cuenta) {
 	    List<Map<String, Object>> rows = new ArrayList<>();
@@ -670,18 +672,9 @@ public class AhorroDAO {
 	        } else {
 	            return 2;
 	        }
-	    } catch (Exception e) {
-	    	
-	        if (e instanceof ConnectException || e instanceof CannotGetJdbcConnectionException
-	        		|| e instanceof PSQLException ) {
-	        	
-	        	log.error("Error " + " [ AhorroDAO] " + " [Tipo Cuenta Cero] ");
-	            return 1;
-	        }else {
-	        	log.error("Error " + " [ AhorroDAO] " + " [Tipo Cuenta Cero ] ");
-	            return 3;
-	        }
-	        
+	    } catch (DataAccessException e) {
+	        log.error("Error al consultar tipo de cuenta cero  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al consultar tipo de cuenta cero [ AhorroDAO ] ", e);
 	    }
 	}
 	public long existeEnProcrea(String solicitante_id){
@@ -689,10 +682,10 @@ public class AhorroDAO {
 		try{
 			cuenta = (long)jdbcTemplatePr.queryForObject(obtenerCuenta, new Object[] { solicitante_id }, long.class);
 			return cuenta;
-		}catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [Existe en procrea ] ");
-		}
-		return 0;
+		} catch (DataAccessException e) {
+	        log.error("Error al obtener Cuenta en procrea [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener cuenta en procrea [ AhorroDAO ] ", e);
+	    }	
 	}
 
 	public AhorroOBJ buscarAhorroProcrea(String cuenta) {
@@ -1109,11 +1102,10 @@ public class AhorroDAO {
 	public String obtenerSecuenciaCuenta() {
 		try {
 			return jdbcTemplatePr.queryForObject(obtenerSecuenciaCuenta, String.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [Obtener Secuencia Cuenta ] ");
-			String error = "Error Ahorro DAO obtener Secuencia Cuenta";
-			return error;
-		}
+		} catch (DataAccessException e) {
+	        log.error("Error al obtener secuencia de cuenta [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener secuencia de cuenta [ AhorroDAO ] ", e);
+	    }
 	}
 	
 
@@ -1253,19 +1245,19 @@ public class AhorroDAO {
 		try {
 			return jdbcTemplatePr.queryForObject(obtenerCuentaContable, new Object[] { rendimientoId, productoId },
 					String.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [Obtener Cuenta Contable ] ");
-			return "";
-		}
+		} catch (DataAccessException e) {
+	        log.error("Error al obtener cuenta contable  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener cuenta contable [ AhorroDAO ] ", e);
+	    }
 	}
 
 	public String obtenerSecuenciaContrato() {
 		try {
 			return jdbcTemplatePr.queryForObject(obtenerSecuenciaContrato, String.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [Obtener Secuencia Contrato ] ");
-			return "";
-		}
+		} catch (DataAccessException e) {
+	        log.error("Error al obtener Secuencia de contrato [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener Secuencia de contrato [ AhorroDAO ] ", e);
+	    }
 	}
 	
 	public List<ConceptoPld> getConceptosPld(Integer cuenta_id){
@@ -1281,9 +1273,10 @@ public class AhorroDAO {
 					lista.add(c);
 				}
 			}
-		}catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [ Get Conceptos Pld ] ");
-		}
+		} catch (DataAccessException e) {
+	        log.error("Error al buscar conceptos Pld [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al buscar conceptos Pld [ AhorroDAO ] ", e);
+	    }
 		return lista;
 	}
 	
@@ -1303,10 +1296,10 @@ public class AhorroDAO {
 				ingresos =(BigDecimal)  row.get(0).get("ingresos_men");
 				monto =(BigDecimal)  row.get(0).get("monto_max_aho");
 			}
-		}
-		catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [ Get Info Cuenta ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener Informacion cuenta [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener Informacion cuenta [ AhorroDAO ] ", e);
+	    }
 		return c;
 	}
 	
@@ -1321,20 +1314,20 @@ public class AhorroDAO {
 				s.setCorreo(String.valueOf(row.get(0).get("correo")));
 				s.setColonia((int)row.get(0).get("colonia"));
 			}
-		}
-		catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [ Get Info Solicitante ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener Informacion del solicitante [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener Informacion del solicitante [ AhorroDAO ] ", e);
+	    }
 		return s;
 	}
 	public String ahorroGeneraReferencia(String cuenta, Integer usuarioId, String sucursal) {
 		try {
 			return jdbcTemplatePr.queryForObject(ahorroGeneraReferencia, new Object[] { cuenta, usuarioId, sucursal },
 					String.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Ahorro Genera Referencia ] ");
-			return "";
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al generar referencia de ahorro [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al generar referencia de ahorro [ AhorroDAO ] ", e);
+	    }
 	}
 
 	public List<AhorroContrato> buscarCuentasXCliente(String solicitante) {
@@ -1467,19 +1460,19 @@ public class AhorroDAO {
 					a.getCveDestino(), a.getErrores(), a.getStatusBloqueo(), a.getHoraPrimerError(), a.getHoraBloqueo(),
 					a.getNumBloqueo(), a.getRequiereIdentificador(), a.getRespaldoMd5());
 			return a.getAhorroContratoId();
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Nuevo Ahorro Contrato ] ");
-			return 0;
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al generar nuevo Ahorro Contrato [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al generar nuevo Ahorro Contrato [ AhorroDAO ] ", e);
+	    }
 	}
 
 	public Integer sigSecAhorroContrato() {
 		try {
 			return jdbcTemplatePr.queryForObject(sigSecAhorroContrato, Integer.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Sig Sec Ahorro Contrato ] ");
-			return 0;
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al generar nueva Sig Sec Ahorro Contrato [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al generar nueva Sig Sec Ahorro Contrato [ AhorroDAO ] ", e);
+	    }
 	}
 
 	public String ahorroCopiaRendimientos(String cuenta, Integer rendimientoId, Double interes, Integer usuarioId,
@@ -1487,28 +1480,29 @@ public class AhorroDAO {
 		try {
 			return jdbcTemplatePr.queryForObject(ahorroCopiaRendimientos,
 					new Object[] { cuenta, rendimientoId, interes, usuarioId, montoApertuta }, String.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Ahorro Copia Rendimientos ] ");;
-			return "ERROR";
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al generar nuevo Ahorro Copia Rendimientos [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al generar nuevo Ahorro Copia Rendimientos [ AhorroDAO ]  ", e);
+	    }
 	}
 
 	public void actualizaAhorroRendimientosVigntes(Integer usuarioId, Integer tipoCapitalizarId, String cuenta) {
 		try {
 			jdbcTemplatePr.update(actualizaAhorroRendimientosVigntes, usuarioId, tipoCapitalizarId, cuenta);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Actualiza Ahorro Rendimientos Vigentes  ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al actualizar Ahorro Rendimientos vigentes  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al actualizar Ahorro Rendimientos vigentes [ AhorroDAO ]  ", e);
+	    }
 	}
 
 	public Boolean actualizaCuentaClabe(AhorroContrato ahorroContrato) {
 		try {
 			jdbcTemplatePr.update(actualizaCuentaClabe, ahorroContrato.getCuentaClabe(),
 					ahorroContrato.getAhorroContratoId());
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Actualiza Cuenta Clabe ] ");
-			return null;
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al actualizar cuenta clabe  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al actualizar cuenta clabe [ AhorroDAO ]  ", e);
+	    }
 
 		return true;
 	}
@@ -1516,26 +1510,29 @@ public class AhorroDAO {
 	public Double calculoGatByCuenta(String cuenta) {
 		try {
 			return jdbcTemplatePr.queryForObject(calculoGatByCuenta, new Object[] { cuenta }, Double.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Calculo Gat By Cuenta ] ");
-			return (double) 0;
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener el calculo Gat By Cuenta  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al actualizar cuenta clabe [ AhorroDAO ]  ", e);
+	    }
+
 	}
 
 	public void actualizaGatAhorroContrato(Double gat, String cuenta) {
 		try {
 			jdbcTemplatePr.update(actualizaGatAhorroContrato, gat, cuenta);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Actualiza Gat Ahorro COntrato ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al actualizar Gat Ahorro Contrato [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al actualizar Gat Ahorro Contrato [ AhorroDAO ]  ", e);
+	    }
 	}
 
 	public void borraAhorroContrato(Integer ahorroContratoId) {
 		try {
 			jdbcTemplatePr.update(borraAhorroContrato, ahorroContratoId);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Borrar Ahorro Contrato ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al actualizar Gat Ahorro Contrato [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al actualizar Gat Ahorro Contrato [ AhorroDAO ]  ", e);
+	    }
 	}
 
 	public Integer generaTarjetaAhorro(String cuenta) {
@@ -1546,10 +1543,10 @@ public class AhorroDAO {
 			resultQuery = jdbcTemplatePr.queryForObject(generaTarjetaAhorro, new Object[] { cuenta, accesoId, "" },
 					String.class);
 			return accesoId;
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Genera Tarjeta Ahorro ] ");
-			return 0;
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al generar Tarjeta de Ahorro [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al generar Tarjeta de Ahorro [ AhorroDAO ]  ", e);
+	    }
 	}
 	public String obtenerContratoAhorro(String cuenta){
 		Map<String,Object> row;
@@ -1560,18 +1557,18 @@ public class AhorroDAO {
 			}
 			else 
 				return "";
-		}catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [ Obtener Contrato Ahorro ] ");
-		}
-		return "";
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener el contrato de ahorro [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener el contrato de ahorro [ AhorroDAO ]  ", e);
+	    }
 	}
 	public Integer sigSecAcceso() {
 		try {
 			return jdbcTemplatePr.queryForObject(sigSecAcceso, Integer.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Sig sec Acceso ] ");
-			return 0;
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al sig Sec Acceso [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al sig Sec Acceso [ AhorroDAO ]  ", e);
+	    }
 	}
 
 	public Double obtenerInteresRendimiento(Integer rendimiento, Double monto) {
@@ -1615,10 +1612,10 @@ public class AhorroDAO {
 			} else {
 				return null;
 			}
-		} catch (Exception ex) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Leer Saldo Actual By Cuenta DAO ] ");
-			return null;
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al leer Saldo Actual By Cuenta Dao [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al leer Saldo Actual By Cuenta Dao [ AhorroDAO ]  ", e);
+	    }
 		return saldos;
 	}
 
@@ -1658,9 +1655,10 @@ public class AhorroDAO {
 		try {
 			rows = jdbcTemplate.queryForMap(buscarCuentaCero,cuenta);
 			cont =(long)rows.get("count");
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Buscar Cuenta En cero ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al buscar Cuenta en cero  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al buscar Cuenta en cero [ AhorroDAO ]  ", e);
+	    }
 		return cont;
 	}
 
@@ -1676,19 +1674,20 @@ public class AhorroDAO {
 			} else {
 				return null;			
 				}
-		} catch (Exception ex) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Leer Saldo By cuenta by Fecha Dao ] ");
-			return null;
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al leer Saldo By Cuenta By Fecha Dao [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al leer Saldo By Cuenta By Fecha Dao [ AhorroDAO ]  ", e);
+	    }
 		return respuesta;
 	}
 
 	public void actualizarEstatusPan(String pan, String estatus) {
 		try {
 			jdbcTemplate.update(actualizarEstatusPan, estatus, pan);
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Actualizar Estatus Pan ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al actualizar estatus Pan [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al actualizar estatus Pan [ AhorroDAO ]  ", e);
+	    }
 	}
 	
 	public Integer obtenerIdCuentaAhorro(String cuenta){
@@ -1699,9 +1698,10 @@ public class AhorroDAO {
 			if(!row.isEmpty()){
 				cuenta_id = (int)row.get(0).get("id");
 			}
-		}catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [ Obtener Id Cuenta Ahorro ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener id  cuenta ahorro [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener id  cuenta ahorro [ AhorroDAO ]  ", e);
+	    }
 		return cuenta_id;
 	}
 	public Integer getMoneda(String cuenta){
@@ -1712,9 +1712,10 @@ public class AhorroDAO {
 			if(!row.isEmpty()){
 				moneda = (int)row.get("moneda_id");
 			}
-		}catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [ Get Moneda ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener moneda  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener moneda [ AhorroDAO ]  ", e);
+	    }
 		return moneda;
 	}
 	public AhorroCuenta obtenerInfoDeCuenta(String cuenta){
@@ -1728,9 +1729,10 @@ public class AhorroDAO {
 				ac.setComoEnteroId((int)row.get("como_entero_id"));
 				ac.setMonedaId((int)row.get("moneda_id"));
 			}
-		}catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [ Obtener Info De Cuenta ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener informacion de cuenta  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener informacion de cuenta  [ AhorroDAO ]  ", e);
+	    }
 		return ac;
 	}
 	public Integer insertarDatosEnAhorroContrato(Integer idUsuario,String cuentaOriginal,String cuentaContable, String cuenta, Integer rendimiento_id, String solicitante_id, Integer cuenta_id,double monto,String contrato){
@@ -1780,10 +1782,10 @@ public class AhorroDAO {
 			if(!row.isEmpty()){
 				ahorro_contrato_id = (int)row.get("ahorro_contrato_id");
 			}
-		}
-		catch(Exception e){
-			log.error("Error " + " [ AhorroDAO] " + " [ Insertar Datos en Ahorro Contrato ] ");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al insertar Datos En Ahorro Contrato  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al insertar Datos En Ahorro Contrato  [ AhorroDAO ]  ", e);
+	    }
 		
 		return ahorro_contrato_id;
 	}
@@ -1805,10 +1807,10 @@ public class AhorroDAO {
 				//cuenta2 = row.get(1).get("descripcion").toString() + " "+ row.get(0).get("valor").toString();
 				return datos;
 			}
-		}
-		catch(Exception e) {
-			log.error("Error al realizar consulta obtenerDatosCuentaInversion" + e.getMessage());
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener datos cuenta inversion  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener datos cuenta inversion  [ AhorroDAO ]  ", e);
+	    }
 		return null;
 			
 	}
@@ -1835,10 +1837,10 @@ public class AhorroDAO {
 				datos.setPuesto(row.get(0).get("puesto").toString());
 				return datos;
 			}
-		}
-		catch(Exception e) {
-			log.error("Error al realizar consulta obtenerDatosCuentaInversion");
-		}
+		}catch (DataAccessException e) {
+	        log.error("Error al obtener datos procrea Cuenta Inversion  [ AhorroDAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al obtener datos procrea Cuenta Inversion  [ AhorroDAO ]  ", e);
+	    }
 		return null;
 			
 	}
