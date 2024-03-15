@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.postgresql.util.PSQLException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -613,17 +614,16 @@ public class AhorroDAO {
 	}
 	
 	public String consultarNip(String tarjeta) {
-		String nip = "";
-		Map<String, Object> row;
-		try {
-			row = jdbcTemplate.queryForMap(consultarNip, tarjeta);
-			nip = (String) row.get("nip");
-		} catch(Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [Consultar Nip] ");
-			return null;
-		}
-		return nip;
-		
+	    String nip = "";
+	    Map<String, Object> row;
+	    try {
+	        row = jdbcTemplate.queryForMap(consultarNip, tarjeta);
+	        nip = (String) row.get("nip");
+	    } catch (DataAccessException e) {
+	        log.error("Error al consultar el NIP: " + e.getMessage());
+	        throw new RuntimeException("Error al consultar el NIP", e);
+	    }
+	    return nip;
 	}
 
 	public long existeEnIzel(String clabe) {
