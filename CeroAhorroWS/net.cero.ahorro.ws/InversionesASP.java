@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.google.gson.Gson;
@@ -71,15 +73,16 @@ public class InversionesASP {
 
 	        InversionesASPLogic AspInv =  new InversionesASPLogic();
 	        resp = AspInv.crearInversionASP(nira);
-	    } catch (MismatchedInputException e) {
+	    } catch (JsonParseException | JsonMappingException e) {
 	        resp.setCodigo(-1);
 	        resp.setMensaje("Error en el formato JSON de la petición: " + e.getMessage());
 	        log.error("Error [ InversionesASP ] [ Error en JSON ]");
-	    } catch (Exception e) {
+	    } catch (IOException e) {
 	        resp.setCodigo(-1);
-	        resp.setMensaje("Error en el proceso: " + e.getMessage());
-	        log.error("Error [ InversionesASP ] [ /CrearInversionASP ]");
+	        resp.setMensaje("Error de E/S al procesar la petición: " + e.getMessage());
+	        log.error("Error [ InversionesASP ] [ Error de E/S ]");
 	    }
+	    
 	    jsonResponse = objectMapper.writeValueAsString(resp);
 	    response = new ResponseEntity<String>(jsonResponse, HttpStatus.OK);
 	    return response;
@@ -114,15 +117,15 @@ public class InversionesASP {
 			}
 			InversionesASPLogic AspInv =  new InversionesASPLogic();
 			resp = AspInv.realizarReinversion(nira);
-		 } catch (MismatchedInputException e) {
-		        resp.setCodigo(-1);
-		        resp.setMensaje("Error en el formato JSON de la petición: " + e.getMessage());
-		        log.error("Error [ InversionesASP ] [ Error en JSON ]");
-		    } catch (Exception e) {
-		        resp.setCodigo(-1);
-		        resp.setMensaje("Error en el proceso: " + e.getMessage());
-		        log.error("Error [ InversionesASP ] [ /crearReinversionASP ]");
-		    }
+		} catch (JsonParseException | JsonMappingException e) {
+	        resp.setCodigo(-1);
+	        resp.setMensaje("Error en el formato JSON de la petición: " + e.getMessage());
+	        log.error("Error [ InversionesASP ] [ Error en JSON ]");
+	    } catch (IOException e) {
+	        resp.setCodigo(-1);
+	        resp.setMensaje("Error de E/S al procesar la petición: " + e.getMessage());
+	        log.error("Error [ InversionesASP ] [ Error de E/S ]");
+	    }
 		    jsonResponse = objectMapper.writeValueAsString(resp);
 		    response = new ResponseEntity<String>(jsonResponse, HttpStatus.OK);
 		    return response;
@@ -160,49 +163,50 @@ public class InversionesASP {
 			}
 			ObtenerInformacionInversionASPLogic infoInversionLogic = new ObtenerInformacionInversionASPLogic();
 			resp = infoInversionLogic.consultarInversionASP(nira);
-		 } catch (MismatchedInputException e) {
-		        resp.setCodigo(-1);
-		        resp.setMensaje("Error en el formato JSON de la petición: " + e.getMessage());
-		        log.error("Error [ InversionesASP ] [ Error en JSON ]");
-		    } catch (Exception e) {
-		        resp.setCodigo(-1);
-		        resp.setMensaje("Error en el proceso: " + e.getMessage());
-		        log.error("Error [ InversionesASP ] [ /crearReinversionASP ]");
-		    }
+		} catch (JsonParseException | JsonMappingException e) {
+	        resp.setCodigo(-1);
+	        resp.setMensaje("Error en el formato JSON de la petición: " + e.getMessage());
+	        log.error("Error [ InversionesASP ] [ Error en JSON ]");
+	    } catch (IOException e) {
+	        resp.setCodigo(-1);
+	        resp.setMensaje("Error de E/S al procesar la petición: " + e.getMessage());
+	        log.error("Error [ InversionesASP ] [ Error de E/S ]");
+	    }
 		    jsonResponse = objectMapper.writeValueAsString(resp);
 		    response = new ResponseEntity<String>(jsonResponse, HttpStatus.OK);
 		    return response;
 		
 	}
 	
-	
-	@RequestMapping(value= "realizarPagos",method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
-	public ResponseEntity<String> consultarPagos(){
-		SecurityContext securityContext = SecurityContextHolder.getContext();
-		Authentication authenticate;
-		ResponseEntity<String> response;
-		String jsonResponse;
-		Gson gson = new Gson();
-		Respuesta resp = new Respuesta();
-		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
-		if(!authenticate.isAuthenticated()) {
-			response = new ResponseEntity<String>(HttpStatus.UNAUTHORIZED);
-			return response;
-		}
-		try {
-			RealizarPagosASPLogic pagosASPLogic = new RealizarPagosASPLogic();
-			pagosASPLogic.revisarPagos();
-			
-		} catch (Exception e) {
-		    resp.setCodigo(-1);
-		    resp.setMensaje("Error en el proceso: " + e.getMessage());
-		    resp.setData(null);
-		}
-		jsonResponse = gson.toJson(resp);
-		response = new ResponseEntity<String>(jsonResponse,HttpStatus.OK);
-		return response;
-		
+	@RequestMapping(value = "realizarPagos", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
+	public ResponseEntity<String> consultarPagos() {
+	    SecurityContext securityContext = SecurityContextHolder.getContext();
+	    Authentication authenticate;
+	    ResponseEntity<String> response;
+	    String jsonResponse;
+	    Gson gson = new Gson();
+	    Respuesta resp = new Respuesta();
+	    authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
+	    if (!authenticate.isAuthenticated()) {
+	        response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+	        return response;
+	    }
+	    try {
+	        RealizarPagosASPLogic pagosASPLogic = new RealizarPagosASPLogic();
+	        pagosASPLogic.revisarPagos();
+	        jsonResponse = gson.toJson(resp);
+	        response = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+	        return response;
+	    } catch (RuntimeException e) {
+	        resp.setCodigo(-1);
+	        resp.setMensaje("Error en tiempo de ejecución: " + e.getMessage());
+	        resp.setData(null);
+	        jsonResponse = gson.toJson(resp);
+	        response = new ResponseEntity<>(jsonResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	        return response;
+	    }
 	}
-	
+
+
 	
 }

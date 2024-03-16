@@ -6,6 +6,9 @@ import java.util.Date;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.InitializationException;
+import org.springframework.beans.BeansException;
+
 import com.google.gson.Gson;
 
 import net.cero.data.AhorroContrato;
@@ -71,9 +74,10 @@ public class CajaDepositoAhorroLogic {
 			gson = new Gson();
 			//avdao = (AhorroIdeValoresDAO) s.getApplicationContext().getBean("AhorroIdeValoresDAO");
 			//vdao = (AhorroRendimientoVigenteDAO) s.getApplicationContext().getBean("AhorroRendimientoVigenteDAO");
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
+		 } catch (BeansException e) {
+		        log.error("Error al inicializar la aplicación: " + e.getMessage());
+		        throw new InitializationException("Error al inicializar la aplicación", e);
+		    }
 	}
 	
 	public Respuesta registrarDeposito(CajaDepositoAhorroReq req){
