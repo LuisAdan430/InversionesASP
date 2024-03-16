@@ -1,6 +1,9 @@
 package net.cero.ahorro.logica;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+
+import javax.xml.ws.WebServiceException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -95,9 +98,12 @@ public class GenerarClabeLogic {
 				}
 			}
 
-		} catch (Exception e) {
-			log.error("Error " + " [ Generar Clabe Logic ] " + " [ Generar Clabe ] ");
-		}
+		} catch (MalformedURLException e) {
+	        log.error("Error de URL al generar la CLABE: " + e.getMessage());
+	    } catch (WebServiceException e) {
+	        log.error("Error de servicio web al generar la CLABE: " + e.getMessage());
+	    } 
+
 		return clabe;
 	}
 
