@@ -13,8 +13,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import javax.validation.ValidationException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.InitializationException;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.dao.DataAccessException;
 
 import com.ibm.icu.util.Calendar;
 
@@ -29,6 +35,7 @@ import net.cero.data.Respuesta;
 import net.cero.data.TazasPlazosOBJ;
 import net.cero.seguridad.utilidades.ConceptosUtil;
 import net.cero.seguridad.utilidades.ConstantesUtil;
+import net.cero.seguridad.utilidades.CustomException;
 import net.cero.seguridad.utilidades.HeaderWS;
 import net.cero.spring.config.Apps;
 import net.cero.spring.dao.AhorroCuentasDAO;
@@ -51,24 +58,27 @@ public class InversionesASPLogic {
 	private static InversionesPagosDAO invpDAO = null;
 	private static AhorroSaldosDAO asdao;
 	private static final String PAGOS_DAO = "InversionesPagosDAO";
-	private static void initialized() {
-		try {
-			Apps s = Apps.getInstance();
-			synchronized(Apps.class) {
-				if(apps == null) 
-					apps = s;
-			}
-			adao = (AhorroDAO) s.getApplicationContext().getBean(ConstantesInversiones.AHORRO_DAO);
-			acmdao = (AhorroCuentasMiDebitoDAO) s.getApplicationContext().getBean(ConstantesInversiones.AHORRO_CUENTAS_DEBITO);
-			arvdao = (AhorroRendimientoVigenteDAO) s.getApplicationContext().getBean(ConstantesInversiones.AHORRO_RENDIMIENTO_VIGENTE);
-			invdao = (InversionesDAO) s.getApplicationContext().getBean(ConstantesInversiones.INVERSIONES_DAO);
-			ahcd = (AhorroCuentasDAO) s.getApplicationContext().getBean(ConstantesInversiones.AHORRO_CUENTAS_DAO);
-			invpDAO = (InversionesPagosDAO) s.getApplicationContext().getBean(PAGOS_DAO);
-			asdao = (AhorroSaldosDAO) s.getApplicationContext().getBean("AhorroSaldosDAO");
-		} catch(Exception e) {
-			log.error(e.getMessage());
-		}
+	private static void initialized() throws InitializationException {
+	    try {
+	        Apps s = Apps.getInstance();
+	        synchronized(Apps.class) {
+	            if(apps == null) 
+	                apps = s;
+	        }
+	        adao = (AhorroDAO) s.getApplicationContext().getBean(ConstantesInversiones.AHORRO_DAO);
+	        acmdao = (AhorroCuentasMiDebitoDAO) s.getApplicationContext().getBean(ConstantesInversiones.AHORRO_CUENTAS_DEBITO);
+	        arvdao = (AhorroRendimientoVigenteDAO) s.getApplicationContext().getBean(ConstantesInversiones.AHORRO_RENDIMIENTO_VIGENTE);
+	        invdao = (InversionesDAO) s.getApplicationContext().getBean(ConstantesInversiones.INVERSIONES_DAO);
+	        ahcd = (AhorroCuentasDAO) s.getApplicationContext().getBean(ConstantesInversiones.AHORRO_CUENTAS_DAO);
+	        invpDAO = (InversionesPagosDAO) s.getApplicationContext().getBean(PAGOS_DAO);
+	        asdao = (AhorroSaldosDAO) s.getApplicationContext().getBean("AhorroSaldosDAO");
+	    } catch (BeansException e) {
+	        log.error("Error al inicializar la aplicación: " + e.getMessage());
+	        throw new InitializationException("Error al inicializar la aplicación", e);
+	    }
 	}
+
+
 	public Respuesta respuestas(Integer codigo) {
 		Respuesta resp = new Respuesta();
 		if(codigo == 1) {
@@ -137,7 +147,7 @@ public class InversionesASPLogic {
 		//log.info(":::::" + saldos.toString());
 	}
 	
-	public Respuesta crearInversionASP(NuevaInversionASPReq req)  {
+	public Respuesta crearInversionASP(NuevaInversionASPReq req)  throws CustomException {
 		initialized();
 		Respuesta resp = new Respuesta();
 		try {
@@ -235,10 +245,19 @@ public class InversionesASPLogic {
 			resp = respuestas(6);
 			return resp;
 			}
-		}catch(Exception e) {
-			resp = respuestas(12);
-		    return resp;
-		}
+		} catch ( BeansException e) {
+	        log.error("Error durante la creación de la inversión ASP: " + e.getMessage());
+	        throw new CustomException("Error durante la creación de la inversión ASP", e);
+	    } catch (ValidationException e) {
+	        log.error("Error de validación durante la creación de la inversión ASP: " + e.getMessage());
+	        throw new CustomException("Error de validación durante la creación de la inversión ASP", e);
+	    } catch (DataAccessException e) {
+	        log.error("Error de acceso a datos durante la creación de la inversión ASP: " + e.getMessage());
+	        throw new CustomException("Error de acceso a datos durante la creación de la inversión ASP", e);
+	    } catch (Exception e) {
+	        log.error("Error desconocido durante la creación de la inversión ASP: " + e.getMessage());
+	        throw new CustomException("Error desconocido durante la creación de la inversión ASP", e);
+	    }
 	}
 	
 	public LocalDate validarDiasHabiles(LocalDate fechaValidarB) {
