@@ -2,30 +2,30 @@ package net.cero.ahorro.logica;
 
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.InitializationException;
+import org.springframework.beans.BeansException;
+
 import com.google.gson.Gson;
-import net.cero.data.AhorroAvisoRetiroOBJ;
-import net.cero.data.AhorroDisposicionesOBJ;
+
+import net.cero.data.AhorroContrato;
+import net.cero.data.AhorroDeposito;
 import net.cero.data.AhorroMovimiento;
 import net.cero.data.AhorroPagare;
+import net.cero.data.AhorroSaldos;
 import net.cero.data.AhorroTransferenciaOBJ;
 import net.cero.data.CajaDepositoAhorroReq;
-import net.cero.data.CajaDisposicionAhorroReq;
 import net.cero.data.MovimientosCaja;
 import net.cero.data.Respuesta;
 import net.cero.spring.config.Apps;
-import net.cero.spring.dao.AhorroAvisosRetiroDAO;
 import net.cero.spring.dao.AhorroContratoDAO;
 import net.cero.spring.dao.AhorroDepositoDAO;
-import net.cero.spring.dao.AhorroDisposicionesDAO;
+//import net.cero.spring.dao.AhorroIdeValoresDAO;
 import net.cero.spring.dao.AhorroMovimientosDAO;
 import net.cero.spring.dao.AhorroPagareDAO;
-import net.cero.spring.dao.AhorroRendimientoVigenteDAO;
 import net.cero.spring.dao.AhorroSaldosDAO;
 import net.cero.spring.dao.MovimientosCajaDAO;
 
@@ -36,24 +36,23 @@ import net.cero.spring.dao.MovimientosCajaDAO;
  * @author Israel
  * @version 1.0 04/07/18
  */
-public class CajaDisposicionAhorroLogic {
-	private static final Logger log = LogManager.getLogger(CajaDisposicionAhorroLogic.class);
+public class CajaDepositoAhorroLogic {
+	private static final Logger log = LogManager.getLogger(CajaDepositoAhorroLogic.class);
 	
 	private static Apps apps = null;
 	
-	//private static AhorroContratoDAO adao;
+	private static AhorroContratoDAO adao;
 	private static AhorroPagareDAO pdao;
 	private static AhorroMovimientosDAO mdao;
-	private static AhorroDisposicionesDAO adispdao;
 	private static MovimientosCajaDAO mcdao;
-	//private static AhorroDepositoDAO addao;
-	//private static AhorroSaldosDAO asdao;
-	//private static AhorroRendimientoVigenteDAO vdao;
-	private static AhorroAvisosRetiroDAO ahorroavisodao;
+	private static AhorroDepositoDAO addao;
+	private static AhorroSaldosDAO asdao;
 	
 	private static AhorroActualizaSaldoLogic ahorroActualizaSaldoL;
-	private static InsertaChequeLogic insertaChequeLogic;
+	
 	private static Gson gson;
+	//private static AhorroRendimientoVigenteDAO vdao;
+	
 	
 	private static void initialized() {
 
@@ -63,176 +62,183 @@ public class CajaDisposicionAhorroLogic {
 				if (apps == null) // si la referencia es null ...
 					apps = s; // ... agrega la clase singleton
 			}
-			//adao = (AhorroContratoDAO) s.getApplicationContext().getBean("AhorroContratoDAO");
+			adao = (AhorroContratoDAO) s.getApplicationContext().getBean("AhorroContratoDAO");
 			pdao = (AhorroPagareDAO) s.getApplicationContext().getBean("AhorroPagareDAO");
 			mdao = (AhorroMovimientosDAO) s.getApplicationContext().getBean("AhorroMovimientosDAO");
 			mcdao = (MovimientosCajaDAO) s.getApplicationContext().getBean("MovimientosCajaDAO");
-			//addao = (AhorroDepositoDAO) s.getApplicationContext().getBean("AhorroDepositoDAO");
-			//asdao = (AhorroSaldosDAO) s.getApplicationContext().getBean("AhorroSaldosDAO");
-			//vdao = (AhorroRendimientoVigenteDAO) s.getApplicationContext().getBean("AhorroRendimientoVigenteDAO");
-			ahorroavisodao = (AhorroAvisosRetiroDAO) s.getApplicationContext().getBean("AhorroAvisosRetiroDAO");
-			adispdao = (AhorroDisposicionesDAO) s.getApplicationContext().getBean("AhorroDisposicionesDAO");
+			addao = (AhorroDepositoDAO) s.getApplicationContext().getBean("AhorroDepositoDAO");
+			asdao = (AhorroSaldosDAO) s.getApplicationContext().getBean("AhorroSaldosDAO");
+			
+			ahorroActualizaSaldoL = new AhorroActualizaSaldoLogic();
 			
 			gson = new Gson();
-			ahorroActualizaSaldoL = new AhorroActualizaSaldoLogic();
-			insertaChequeLogic = new InsertaChequeLogic();
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
+			//avdao = (AhorroIdeValoresDAO) s.getApplicationContext().getBean("AhorroIdeValoresDAO");
+			//vdao = (AhorroRendimientoVigenteDAO) s.getApplicationContext().getBean("AhorroRendimientoVigenteDAO");
+		 } catch (BeansException e) {
+		        log.error("Error al inicializar la aplicación: " + e.getMessage());
+		        throw new InitializationException("Error al inicializar la aplicación", e);
+		    }
 	}
 	
-	public Respuesta disposicionAhorro(CajaDisposicionAhorroReq req){
-		
+	public Respuesta registrarDeposito(CajaDepositoAhorroReq req){
 		initialized();
-		//System.out.println("******** INICIA DISPOSICION *********");
 		Respuesta respuesta = new Respuesta();
-		AhorroDisposicionesOBJ ahorroDisposicion = new AhorroDisposicionesOBJ();
-		MovimientosCaja movimientoCaja = new MovimientosCaja();
+		Integer vMovimientoCaja = 0;
+		AhorroMovimiento ahorroMovimiento = new AhorroMovimiento();
+		AhorroContrato ahorroContrato = new AhorroContrato();
+		AhorroDeposito ahorroDeposito = new AhorroDeposito();
+		MovimientosCaja movimientoCajaResult = new MovimientosCaja();
 		AhorroTransferenciaOBJ ahorroTransferencia = new AhorroTransferenciaOBJ();
-		try{
-			AhorroAvisoRetiroOBJ ahorroAviso = new AhorroAvisoRetiroOBJ();
+		AhorroPagare ahorroPagaresNuevo = new AhorroPagare();
+		
+		Timestamp vFecha = new Timestamp(System.currentTimeMillis());
+		
+		log.info(req.toString());
+		
+		//log.info("Cuenta -> " + req.getCuentaAhorro());
+		ahorroContrato = adao.buscarByCuenta(req.getCuentaAhorro());
+		//log.info("Json -> " +  gson.toJson(ahorroContrato));
+		AhorroPagare ahorroPagares = pdao.buscarByCuenta(req.getCuentaAhorro());
+		//log.info(ahorroPagares.toString());
+		ahorroMovimiento = mdao.buscarById(req.getMovtoId());
+		//log.info(ahorroMovimiento.toString());
+		
+		
+		//El crislog.info("saldo -> " +ahorroContrato.getSaldo());
+		if(ahorroContrato.getSaldo() == 0){
 			
-			if(req.getAvisoId() != null){
-				ahorroAviso = ahorroavisodao.obtenerAvisoRetiroById(req.getAvisoId());
-			}
+			ahorroPagaresNuevo.setCuenta(req.getCuentaAhorro());
 			
-			Integer ahorroPagareNumero = 0;
-			//Busca el numero maximo de cuenta registrado
-			//ahorroPagareNumero = pdao.buscarMaxNumPagareByCuenta(req.getCuentaAhorro());
-			
-			//Obtiene el tipo de movimiento//
-			AhorroMovimiento ahorroMovimiento = new AhorroMovimiento();
-			ahorroMovimiento = mdao.buscarById(req.getMovtoId());
-			
-			//log.info("::::" + ahorroMovimiento.toString());
-			
-			
-			//System.out.println("ANTES DE EVALUAR AHORRO MOVIMEINTO*+*+*+*+*+*+*+*+");
-			if(ahorroMovimiento != null){
-				if(ahorroMovimiento.getSalvoBuenCobro() != null && !ahorroMovimiento.getSalvoBuenCobro().equals("S")){
-						ahorroActualizaSaldoL.ahorroActualizasaldo(req.getFecha(), req.getCuentaAhorro(), req.getMonto(), ahorroMovimiento.getOperacion());
+			if(ahorroPagares != null){
+				if(ahorroPagares.getNumero() != null){
+					ahorroPagaresNuevo.setNumero(ahorroPagares.getNumero() + 1);
 				}else{
-					/*
-					log.info("::::" + req.getFecha() 
-						   + "::::" + req.getCuentaAhorro()
-						   + "::::" + req.getMonto()
-						   + "::::" + ahorroMovimiento.getOperacion());
-					*/
-					ahorroActualizaSaldoL.ahorroActualizasaldo(req.getFecha(), req.getCuentaAhorro(), req.getMonto(), ahorroMovimiento.getOperacion());
+					ahorroPagaresNuevo.setNumero((long) 1);
 				}
+			}else{
+				ahorroPagaresNuevo.setNumero((long) 1);
 			}
 			
-			//log.info(req.toString());
+			ahorroPagaresNuevo.setMonto(req.getMonto());
+			ahorroPagaresNuevo.setFechaInicio(req.getFecha());
+			ahorroPagaresNuevo.setCreadoPor((int) req.getUsuarioId());
+			ahorroPagaresNuevo.setFechaCreacion(vFecha);
+			ahorroPagaresNuevo.setModificadoPor((int) req.getUsuarioId());
+			ahorroPagaresNuevo.setFechaModificacion(vFecha);
 			
+			
+			ahorroPagaresNuevo.setPagareId(pdao.nuevo(ahorroPagaresNuevo));
+		}
+		log.info(ahorroPagaresNuevo.toString());
+		
+		
+		vMovimientoCaja = null;
+		if(req.getParaConciliar() == 1){
+			vMovimientoCaja = mcdao.obtenerMovimientoId(req.getCuentaAhorro(), req.getMonto(), req.getFecha());
+		}
+		
+		if(vMovimientoCaja == null){
+			MovimientosCaja movimientoCaja = new MovimientosCaja();
+			movimientoCaja.setControl(req.getControl());
 			movimientoCaja.setCajaId(req.getCajaId());
-			movimientoCaja.setCajeroId(req.getUsuarioId());
+			movimientoCaja.setCajeroId((int) req.getUsuarioId());
 			movimientoCaja.setFecha(req.getFecha());
 			movimientoCaja.setTipoMovId(req.getMovtoId());
-			 Date date = new Date();
-			 Timestamp timestamp2 = new Timestamp(date.getTime());
-			movimientoCaja.setFechaCreacion(timestamp2);
 			movimientoCaja.setMonedaId(1);
 			movimientoCaja.setMonto(req.getMonto());
 			movimientoCaja.setCuenta(req.getCuentaAhorro());
 			movimientoCaja.setFormaPago(req.getFormaPago());
-			movimientoCaja.setCreadoPor(req.getUsuarioId());
-			movimientoCaja.setModificadoPor(req.getUsuarioId());
-			movimientoCaja.setBancoId(req.getBancoId());
-			movimientoCaja.setCheque(req.getCheque());
 			movimientoCaja.setObs(req.getObservacion());
+			movimientoCaja.setBancoId(req.getBancoId());
+			movimientoCaja.setBancoOrigen(req.getBancoId());
+			movimientoCaja.setRegionId((int) req.getSucursalId());
+			movimientoCaja.setCreadoPor((int) req.getUsuarioId());
+			movimientoCaja.setModificadoPor((int) req.getUsuarioId());
 			movimientoCaja.setEstatus("C");
-			if(req.getTransaccionId() != null){
-				movimientoCaja.setTransaccionId(req.getTransaccionId().toString());
-			}
-			if(req.getTarjetaOperativaId() != null){
-				movimientoCaja.setTarjetaOperativaOd(req.getTarjetaOperativaId().toString());
-			}
-			if(ahorroAviso.getRegion() != null){
-				movimientoCaja.setRegionId(ahorroAviso.getRegion());
-			}
-			
-			//log.info(movimientoCaja.toString());
+			movimientoCaja.setFechaCreacion(vFecha);
+			movimientoCaja.setFechaDeposito(vFecha);
 			
 			movimientoCaja.setMovimientoId(mcdao.nuevo(movimientoCaja));
-
-			/*if(ahorroPagareNumero > 0){
-				AhorroPagare ahorroPagare = new AhorroPagare();
-				ahorroPagare = pdao.buscarByCuentaNumero(req.getCuentaAhorro(), ahorroPagareNumero);
-				Double montoNuevo = (double) 0;
-				montoNuevo = (ahorroPagare.getMonto() - req.getMonto());
-				ahorroPagare.setMonto(montoNuevo);
-			}*/
-
-			String tipoTrans = "C";
-			if(req.getSpeiTransferenciaId() != null){
-				if(req.getSpeiTransferenciaId() > 0){
-					tipoTrans = "S";
+			movimientoCajaResult = movimientoCaja;
+			if(req.getMovtoId() == 2){
+				ahorroDeposito.setDepositoId(movimientoCaja.getMovimientoId());
+				ahorroDeposito.setCuenta(req.getCuentaAhorro());
+				ahorroDeposito.setMonto(req.getMonto());
+				ahorroDeposito.setFecha(vFecha);
+				ahorroDeposito.setFormaPago(req.getFormaPago());
+				ahorroDeposito.setBanco(req.getBancoId());
+				ahorroDeposito.setNoCheque(req.getCheque());
+				ahorroDeposito.setObservaciones(req.getObservacion());
+				ahorroDeposito.setCreadoPor((int) req.getUsuarioId());
+				ahorroDeposito.setFechaCreacion(vFecha);
+				ahorroDeposito.setModificadoPor((int) req.getUsuarioId());
+				ahorroDeposito.setFechaModificacion(vFecha);
+			}
+			
+			if(ahorroMovimiento.getSalvoBuenCobro() == null){
+				ahorroActualizaSaldoL.ahorroActualizasaldo(req.getFecha(),req.getCuentaAhorro(), req.getMonto(), ahorroMovimiento.getOperacion());
+			}else{
+				if(!ahorroMovimiento.getSalvoBuenCobro().equals("S")){
+					ahorroActualizaSaldoL.ahorroActualizasaldo(req.getFecha(),req.getCuentaAhorro(), req.getMonto(), ahorroMovimiento.getOperacion());
 				}
 			}
-
-			if(req.getMovtoId() != 37){
-				ahorroDisposicion.setCuenta(req.getCuentaAhorro());
-				ahorroDisposicion.setFecha(req.getFecha());
-				ahorroDisposicion.setMonto(req.getMonto());
-				ahorroDisposicion.setFormaPagoId(req.getFormaPago());
-				ahorroDisposicion.setBancoId(req.getBancoId());
-				ahorroDisposicion.setCheque(req.getCheque());
-				ahorroDisposicion.setMovtoId(req.getMovtoId());
-				ahorroDisposicion.setCreadoPor(req.getUsuarioId());
-				if(req.getTransaccionId() != null){
-					ahorroDisposicion.setTransaccionId(req.getTransaccionId());
-				}
-				if(req.getTarjetaOperativaId() != null){
-					ahorroDisposicion.setTarjetaOperativaId(req.getTarjetaOperativaId());
-				}
-				if(req.getApp() != null){
-					ahorroDisposicion.setApp(req.getApp());
-				}
-				if(req.getTransaccionVersionId() != null){
-					ahorroDisposicion.setTransaccionVersionId(req.getTransaccionVersionId());
-				}
-				if(req.getAvisoId() != null){
-					ahorroDisposicion.setAvisoId(req.getAvisoId());
-				}
-				ahorroDisposicion.setId(adispdao.nuevo(ahorroDisposicion));
-
-				ahorroTransferencia.setMovimientoId(movimientoCaja.getMovimientoId());
-				ahorroTransferencia.setDisposicionId(ahorroDisposicion.getId());
-				ahorroTransferencia.setCuentaOrigen(req.getCuentaAhorro());
-				ahorroTransferencia.setMonto(req.getMonto());
-				
-				if(req.getCheque() != null){
-					if(!req.getCheque().trim().isEmpty()){
-						//ESTA SECCION ES PARA CREDITOS DE PROCREA POR LO QUE NO SE EJECUTA
-						//perform inserta_cheque (pcuenta, cast('H' as varchar), cast(pmonto as numeric(10,2)),pcheque,pbanco,puser,pfecha,p_banco_clie,tipo_trans,viddis,p_spei_transferencia_id);
-						//InsertaChequeReqOBJ insertaChequeReq = new InsertaChequeReqOBJ();
-						//insertaChequeLogic.insertaCheque(insertaChequeReq);
-					}
+		}else{
+			MovimientosCaja movimientoCajaExistente = new MovimientosCaja();
+			movimientoCajaExistente = mcdao.findMovimientoById(vMovimientoCaja);
+			movimientoCajaExistente.setEstatus("C");
+			movimientoCajaExistente.setBancoId(req.getBancoId());
+			movimientoCajaExistente.setBancoOrigen(req.getBancoId());
+			movimientoCajaExistente.setFechaDeposito(req.getFechaDeposito());
+			movimientoCajaExistente.setModificadoPor((int) req.getUsuarioId());
+			mcdao.actualizaMovimiento(movimientoCajaExistente);
+			
+			movimientoCajaResult = movimientoCajaExistente;
+			if(ahorroMovimiento.getSalvoBuenCobro() == null){
+				ahorroActualizaSaldoL.ahorroActualizasaldo(req.getFecha(),req.getCuentaAhorro(), req.getMonto(), ahorroMovimiento.getOperacion());
+			}else{
+				if(!ahorroMovimiento.getSalvoBuenCobro().equals("S")){
+					ahorroActualizaSaldoL.ahorroActualizasaldo(req.getFecha(),req.getCuentaAhorro(), req.getMonto(), ahorroMovimiento.getOperacion());
 				}
 			}
-
-			if(req.getAvisoId() != null){
-				if(req.getAvisoId() > 0){
-					ahorroAviso = ahorroavisodao.obtenerAvisoRetiroById(req.getAvisoId());
-					if(ahorroAviso != null){
-						if(ahorroAviso.getAvisoId() != null){
-							if(ahorroAviso.getAvisoId() > 0){
-								ahorroAviso.setMovimientoId(movimientoCaja.getMovimientoId());
-
-								if(req.getBancoId() == 555){
-									ahorroAviso.setEstatus("E");
-								}
-								ahorroAviso.setModificadoPor(req.getUsuarioId());
-								ahorroavisodao.actualizaAvisoRetiro(ahorroAviso);
-							}
-						}
-					}
-				}
-			}
-		}catch(Exception e){
-			log.error(e);
 		}
 		
+		if(req.getMovtoId() != 38){
+			Double  vide = ahorroIde(req.getCuentaAhorro(),req.getFecha(),req.getFecha());
+			
+			if(vide > 0){
+				MovimientosCaja movimientoCajaNuevo = new MovimientosCaja();
+				movimientoCajaNuevo.setCajaId(req.getCajaId());
+				movimientoCajaNuevo.setCajeroId((int) req.getUsuarioId());
+				movimientoCajaNuevo.setFecha(vFecha);
+				movimientoCajaNuevo.setTipoMovId(14);
+				movimientoCajaNuevo.setMonedaId(1);
+				movimientoCajaNuevo.setMonto(vide);
+				movimientoCajaNuevo.setCuenta(req.getCuentaAhorro());
+				movimientoCajaNuevo.setFormaPago(4);
+				movimientoCajaNuevo.setCreadoPor((int) req.getUsuarioId());
+				movimientoCajaNuevo.setFechaCreacion(vFecha);
+				movimientoCajaNuevo.setModificadoPor((int) req.getUsuarioId());
+				movimientoCajaNuevo.setFechaModificacion(vFecha);
+				movimientoCajaNuevo.setObs("ide");
+				movimientoCajaNuevo.setRegionId((int) req.getSucursalId());
+				
+				movimientoCajaNuevo.setMovimientoId(mcdao.nuevo(movimientoCajaNuevo));
+				movimientoCajaResult = movimientoCajaNuevo;
+				AhorroSaldos ahorroSaldos = new AhorroSaldos();
+				ahorroSaldos = asdao.buscarByCuenta(req.getCuentaAhorro());
+				ahorroSaldos.setSaldoReal((ahorroSaldos.getSaldoReal() - vide));
+				ahorroSaldos.setSaldoDisponible((ahorroSaldos.getSaldoDisponible() - vide));
+				
+				asdao.actualizar(ahorroSaldos);
+				
+				ahorroContrato.setSaldo(ahorroContrato.getSaldo() - vide);
+				adao.actualizar(ahorroContrato);
+			}
+			
+		}
+		
+		ahorroTransferencia.setDepositoId(movimientoCajaResult.getMovimientoId());
+		ahorroTransferencia.setCuentaDestino(req.getCuentaAhorro());
 		
 		respuesta.setCodigo(0);
 		respuesta.setMensaje("Deposito registrado");
@@ -240,7 +246,10 @@ public class CajaDisposicionAhorroLogic {
 		return respuesta;
 	}
 
+	private Double ahorroIde(String cuenta, Date fechaDesde, Date fechaHasta) {
+		Double valor = (double) 0;
+		return valor;
+	}
 	
 	
-		
 }

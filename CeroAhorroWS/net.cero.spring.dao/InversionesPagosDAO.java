@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -53,10 +54,10 @@ public class InversionesPagosDAO {
 				infoPagos.add(infoPagosHoy);
 			}
 			return infoPagos;
-		}catch(Exception e) {
-			log.error("Error " + " [ Inversiones Pagos DAO ] " + " [ pagos Hoy ] ");
-			return null;
-		}
+		} catch (DataAccessException e) {
+	        log.error("Error al pagos Hoy  [ Inversiones Pagos DAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al pagos Hoy [ Inversiones Pagos DAO ] ", e);
+	    }	
 	}
 	public List<String> informacionAhorroContrato(String idAhorroContrato){
 		String cuentaPadre = "";
@@ -73,10 +74,10 @@ public class InversionesPagosDAO {
 			 infoAhorroContrato.add(cuenta);
 			 infoAhorroContrato.add(referencia);
 			 return infoAhorroContrato;
-		 }catch(Exception e) {
-			 log.error("Error " + " [ Inversiones Pagos DAO ] " + " [ Informacion Ahorro Contrato ] ");
-			 return null;
-		 }
+		} catch (DataAccessException e) {
+	        log.error("Error en   [ Inversiones Pagos DAO ] : " + e.getMessage());
+	        throw new RuntimeException("Error al pagos Hoy [ Inversiones Pagos DAO ] ", e);
+	    }
 	}
 	
 	public List<Boolean> editarPagos(Date fechaModificacion,Integer usuarioModificacion,String idAhorro,LocalDate fechaHoy) {

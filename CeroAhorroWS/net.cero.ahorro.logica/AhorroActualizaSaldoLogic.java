@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.InitializationException;
+import org.springframework.beans.BeansException;
+
 import net.cero.data.AhorroContrato;
 import net.cero.data.AhorroRendimientoVigentes;
 import net.cero.data.AhorroSaldos;
@@ -36,9 +39,10 @@ public class AhorroActualizaSaldoLogic {
 			adao = (AhorroContratoDAO) s.getApplicationContext().getBean("AhorroContratoDAO");
 			asdao = (AhorroSaldosDAO) s.getApplicationContext().getBean("AhorroSaldosDAO");
 			vdao = (AhorroRendimientoVigenteDAO) s.getApplicationContext().getBean("AhorroRendimientoVigenteDAO");
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
+		} catch (BeansException e) {
+	        log.error("Error al inicializar la aplicación: " + e.getMessage());
+	        throw new InitializationException("Error al inicializar la aplicación", e);
+	    }
 	}
 	
 	public void ahorroActualizasaldo(Date fecha, String cuenta, Double monto, String operacion) {

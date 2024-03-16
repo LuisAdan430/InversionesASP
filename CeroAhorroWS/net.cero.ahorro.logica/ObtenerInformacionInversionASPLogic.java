@@ -1,12 +1,15 @@
 package net.cero.ahorro.logica;
 
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.InitializationException;
+import org.springframework.beans.BeansException;
 
 import com.google.gson.Gson;
 import com.ibm.icu.util.Calendar;
@@ -55,11 +58,17 @@ public class ObtenerInformacionInversionASPLogic {
 			resp = respuestas(2,null);
 			return resp;
 		}
-		}catch(Exception e) {
-			resp = respuestas(4,null);
-		    return resp;
-		}
 		
+		
+	} catch (DateTimeParseException e) {
+        log.error("Error al parsear la fecha: " + e.getMessage());
+        resp = respuestas(4, null);
+        return resp;
+    } catch (NumberFormatException e) {
+        log.error("Error de formato numérico: " + e.getMessage());
+        resp = respuestas(4, null);
+        return resp;
+    } 
 		
 	}
 	public Boolean validarVariables(InformacionInversionASPReq datos) {
@@ -154,8 +163,9 @@ public class ObtenerInformacionInversionASPLogic {
 					apps = s;
 			}
 			invdao = (InversionesDAO) s.getApplicationContext().getBean(ConstantesInversiones.INVERSIONES_DAO);
-		}catch (Exception e) {
-			log.error(e.getMessage());
-		}
+		} catch (BeansException e) {
+	        log.error("Error al inicializar la aplicación: " + e.getMessage());
+	        throw new InitializationException("Error al inicializar la aplicación", e);
+	    }
 	}
 }
