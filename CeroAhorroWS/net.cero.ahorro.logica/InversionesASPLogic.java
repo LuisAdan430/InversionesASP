@@ -1,5 +1,6 @@
 package net.cero.ahorro.logica;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,6 +38,7 @@ import net.cero.seguridad.utilidades.ConceptosUtil;
 import net.cero.seguridad.utilidades.ConstantesUtil;
 import net.cero.seguridad.utilidades.CustomException;
 import net.cero.seguridad.utilidades.HeaderWS;
+import net.cero.seguridad.utilidades.SpecificException;
 import net.cero.spring.config.Apps;
 import net.cero.spring.dao.AhorroCuentasDAO;
 import net.cero.spring.dao.AhorroCuentasMiDebitoDAO;
@@ -147,7 +149,7 @@ public class InversionesASPLogic {
 		//log.info(":::::" + saldos.toString());
 	}
 	
-	public Respuesta crearInversionASP(NuevaInversionASPReq req)  throws CustomException {
+	public Respuesta crearInversionASP(NuevaInversionASPReq req)  throws CustomException, SQLException {
 		initialized();
 		Respuesta resp = new Respuesta();
 		try {
@@ -245,18 +247,18 @@ public class InversionesASPLogic {
 			resp = respuestas(6);
 			return resp;
 			}
-		} catch ( BeansException e) {
+		} catch (NoSuchBeanDefinitionException e) {
+	        log.error("Error al inicializar la aplicación: " + e.getMessage());
+	        throw new CustomException("Error al inicializar la aplicación", e);
+	    } catch (BeansException e) {
 	        log.error("Error durante la creación de la inversión ASP: " + e.getMessage());
 	        throw new CustomException("Error durante la creación de la inversión ASP", e);
 	    } catch (ValidationException e) {
-	        log.error("Error de validación durante la creación de la inversión ASP: " + e.getMessage());
+	        log.error("Error de validación  durante la creación de la inversión ASP: " + e.getMessage());
 	        throw new CustomException("Error de validación durante la creación de la inversión ASP", e);
 	    } catch (DataAccessException e) {
 	        log.error("Error de acceso a datos durante la creación de la inversión ASP: " + e.getMessage());
 	        throw new CustomException("Error de acceso a datos durante la creación de la inversión ASP", e);
-	    } catch (Exception e) {
-	        log.error("Error desconocido durante la creación de la inversión ASP: " + e.getMessage());
-	        throw new CustomException("Error desconocido durante la creación de la inversión ASP", e);
 	    }
 	}
 	
@@ -276,35 +278,30 @@ public class InversionesASPLogic {
 		
 	}
 	public Boolean pagosMensuales(Integer plazo,Integer idAhorro,Double interesPorcentaje,BigDecimal monto) {
-		try {
-			Integer cuentaId = 1;
-			String poliza = "MODALIDAD_1";
-			Double montoF = monto.doubleValue();
-			Integer usuarioCreacion = 1;
-			Double interesPorcentajeF = (interesPorcentaje /100);
-			FechasDepositosInversionesOBJ fechasDepositos = new FechasDepositosInversionesOBJ();
-			fechasDepositos = asignacionFechas(plazo);
-			log.info(interesPorcentajeF);
-			Integer conteoFechas = fechasDepositos.getFechas().size();
+		Integer cuentaId = 1;
+		String poliza = "MODALIDAD_1";
+		Double montoF = monto.doubleValue();
+		Integer usuarioCreacion = 1;
+		Double interesPorcentajeF = (interesPorcentaje /100);
+		FechasDepositosInversionesOBJ fechasDepositos = new FechasDepositosInversionesOBJ();
+		fechasDepositos = asignacionFechas(plazo);
+		log.info(interesPorcentajeF);
+		Integer conteoFechas = fechasDepositos.getFechas().size();
+		
+		for(Integer contador = 0 ; contador < conteoFechas; contador ++ ) {
+			LocalDate fechaPrevia = fechasDepositos.getFechas().get(contador);
+			LocalDate fechaInicial = fechasDepositos.getFechasIniciales().get(contador);
+			LocalDate fechaFinal = validarDiasHabiles(fechaPrevia);
 			
-			for(Integer contador = 0 ; contador < conteoFechas; contador ++ ) {
-				LocalDate fechaPrevia = fechasDepositos.getFechas().get(contador);
-				LocalDate fechaInicial = fechasDepositos.getFechasIniciales().get(contador);
-				LocalDate fechaFinal = validarDiasHabiles(fechaPrevia);
-				
-				Date fechaFinalFormatoBase = Date.from(fechaFinal.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-				Date fechaInicialFormatoBase = Date.from(fechaInicial.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-				
-				Integer plazoModalidad = fechasDepositos.getDiasContablesPagos().get(contador);
-				//Boolean respuesta = invpDAO.insertarPagos(cuentaId,poliza,idAhorro.toString(), fechaFinalFormatoBase,interesPorcentajeF ,plazoModalidad, montoF, fechaInicialFormatoBase, usuarioCreacion, true);
-				invpDAO.insertarPagos(cuentaId,poliza,idAhorro.toString(), fechaFinalFormatoBase,interesPorcentajeF ,plazoModalidad, montoF, fechaInicialFormatoBase, usuarioCreacion, true);
-				//log.info(respuesta);
-			}
-			return true;
-		}catch(Exception e) {
-			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Pagos Mensuales  ] ");
-			return false;
+			Date fechaFinalFormatoBase = Date.from(fechaFinal.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+			Date fechaInicialFormatoBase = Date.from(fechaInicial.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+			
+			Integer plazoModalidad = fechasDepositos.getDiasContablesPagos().get(contador);
+			//Boolean respuesta = invpDAO.insertarPagos(cuentaId,poliza,idAhorro.toString(), fechaFinalFormatoBase,interesPorcentajeF ,plazoModalidad, montoF, fechaInicialFormatoBase, usuarioCreacion, true);
+			invpDAO.insertarPagos(cuentaId,poliza,idAhorro.toString(), fechaFinalFormatoBase,interesPorcentajeF ,plazoModalidad, montoF, fechaInicialFormatoBase, usuarioCreacion, true);
+			//log.info(respuesta);
 		}
+		return true;
 		
 	}
 	public List<TazasPlazosOBJ> obtenerTazasPlazosByCanalAndPlazo(Integer plazo) {
@@ -312,14 +309,11 @@ public class InversionesASPLogic {
 		
 		List<TazasPlazosOBJ> tazasPlazosOBJ = new ArrayList<>();
 		String canal = ConstantesInversiones.CANAL_ASP_PAGO;
-		try {
+		
 			tazasPlazosOBJ = invdao.obtenerTazasPlazosByCanalAndPlazo(canal, plazo);
 			return tazasPlazosOBJ;
-		} catch (Exception ex) {
-			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Obtener Tazas Plazos By Canal And Plazo ] ");
-		}
 		
-		return tazasPlazosOBJ;
+		
 		
 	}
 	public FechasDepositosInversionesOBJ asignacionFechas(Integer plazo) {
@@ -410,12 +404,10 @@ public class InversionesASPLogic {
 		    		}
 			    	String fechaString = ultimoDiaDelSiguienteMes+"/"+numeroString+"/"+year;
 			    	DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-			    	try {
+			    	
 			    		LocalDate fecha = LocalDate.parse(fechaString,formato);
 			    		fechas.add(fecha);
-			    	}catch(Exception e) {
-			    		log.info("La fecha no es valida");
-			    	}
+			    	
 			    	t++;
 			    }
 	        
@@ -465,15 +457,13 @@ public class InversionesASPLogic {
 	        	}
 	        	String fechaString = descuentoDeMesFinalC+"/"+mesFinalC+"/"+year;
 	        	DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		    	try {
+		    	
 		    		Date fechaInicialDate = calendar.getTime();
 		    	    LocalDate fechaInicial = fechaInicialDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 		    	    fechasIniciales.add(fechaInicial);
 		    		LocalDate fecha = LocalDate.parse(fechaString,formato);
 		    		fechas.add(fecha);
-		    	}catch(Exception e) {
-		    		log.info("La fecha no es valida");
-		    	}
+		    	
 	      
 		  objeto.setDiasContablesPagos(diasContablesPagos);
 		  objeto.setFechas(fechas);
@@ -508,7 +498,7 @@ public class InversionesASPLogic {
 		
 		return montoFinal;
 	}
-	public Boolean obtenerSaldo(String cuentaOriginal,BigDecimal monto) {
+	public Boolean obtenerSaldo(String cuentaOriginal,BigDecimal monto) throws SpecificException {
 		BigDecimal saldo = obtenerSaldo(cuentaOriginal);
 		log.info("[InversionesASPLogic]:::::::"+"[OBTENER SALDO]:::::" + saldo);
 		if(saldo.doubleValue() < monto.doubleValue()) {
@@ -518,11 +508,11 @@ public class InversionesASPLogic {
 		}
 		
 	}
-	private BigDecimal obtenerSaldo(String cuentaOriginal) {
+	private BigDecimal obtenerSaldo(String cuentaOriginal) throws SpecificException {
 		Double saldo = 0.0;
 		MiDebitoLogic miDebitoLogic = null;
 		miDebitoLogic = new MiDebitoLogic();
-		try {
+	
 			AhorroCuentaMiDebitoOBJ miDebito =  new AhorroCuentaMiDebitoOBJ();
 			miDebito = acmdao.buscarMiDebitoByCuenta(cuentaOriginal, ConceptosUtil.CLAVE_CONCEPTO_DATOS_CUENTA, ConceptosUtil.ESTATUS_CONCEPTO_DATOS_CUENTA);
 			
@@ -535,9 +525,7 @@ public class InversionesASPLogic {
 				log.info(miDebito.getProveedor());
 				saldo = miDebitoLogic.consultaSaldoAhorroMiDebito(miDebito);
 			}
-		}catch(Exception e) {
-			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Obtener Saldo ] ");
-		}
+		
 		return new BigDecimal(saldo.doubleValue());
 	}
 	public Respuesta  realizarReinversion(NuevaInversionASPReq req) {
@@ -577,7 +565,7 @@ public class InversionesASPLogic {
 				resp = respuestas(1);
 				return resp;
 			}
-		}catch(Exception e) {
+		}catch(SQLException e) {
 			resp = respuestas(12);
 		    return resp;
 		}
@@ -628,11 +616,9 @@ public class InversionesASPLogic {
 		
 		List<CapitalizarRendimientosOBJ> capitalizarRendimientosObjList = new ArrayList<>();
 		
-		try {
-			capitalizarRendimientosObjList = invdao.obtenerCapitalizarRendimientosOBJ(id);
-		} catch (Exception ex) {
-			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Capitalizar Rendimientos ] ");
-		}
+		
+		capitalizarRendimientosObjList = invdao.obtenerCapitalizarRendimientosOBJ(id);
+		
 		
 		return capitalizarRendimientosObjList;
 		
@@ -643,17 +629,13 @@ public class InversionesASPLogic {
 		return interes;
 	}
 	private String generaCuentaClabe(String referencia, int ahorroId, String sucursalApertura) {
-		try {
+		
 			GenerarClabeLogic generaClabe = new GenerarClabeLogic();
 			String cuentaClabe = ConstantesInversiones.COMILLAS_VACIAS;
 			cuentaClabe = generaClabe.generarClabe(referencia,
 					ahorroId, sucursalApertura);
 			return cuentaClabe;
-		} catch (Exception e) {
-			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Genera Cuenta Clabe ] ");
-			log.error(ConstantesInversiones.ERROR_GENERAR_CLAVE_CUENTA);
-			return null;
-		}
+		
 	}
 	public Double regresarCalculoGat(String cuenta) {
 		Double gat = adao.regresaCalculoGAT(cuenta);
@@ -677,7 +659,7 @@ public class InversionesASPLogic {
 		
 		String uuidGlobal = UUID.randomUUID().toString();
 		Respuesta resp = new Respuesta();
-		try{
+		
 			AhorroTransferenciaReqOBJ req = new AhorroTransferenciaReqOBJ();
 			req.setCuentaOrigen(cuentaOrigen);
 			req.setCuentaDestino(cuentaDestino);
@@ -693,10 +675,7 @@ public class InversionesASPLogic {
 			//log.info(":::: " + "[HEADER] " + header + "::::" + "[REQ]" + req + "::::" + "[UUIDGLOBAL]" + uuidGlobal);
 			resp = logic.procesaTransferencia(header, req, uuidGlobal);
 			
-		}catch(Exception e) {
-			resp.setCodigo(1);
-			resp.setMensaje(ConstantesInversiones.ERROR_REALIZAR_DEPOSITO_INVERSION);
-		}
+		
 		
 
 		return resp;
@@ -864,14 +843,11 @@ public class InversionesASPLogic {
 	public List<TazasPlazosOBJ> obtenerTazasPlazos(String canal) {
 		initialized();
 		
-		try {
+		
 			List<TazasPlazosOBJ> tazasPlazosOBJ = invdao.obtenerTazasPlazos(canal);
 			return tazasPlazosOBJ;
-		} catch (Exception ex) {
-			log.error("Error " + " [ Inversiones ASP Logic ] " + " [ Obtener Tazas Plazos ] ");
-		}
 		
-		return null;
+		
 		
 	}
 	

@@ -4,6 +4,7 @@
  */
 package net.cero.ahorro.logica;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -12,6 +13,8 @@ import net.cero.ahorro.ws.util.LogWsUtil;
 import net.cero.spring.dao.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.InitializationException;
+import org.springframework.beans.BeansException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -81,9 +84,10 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			cajaDisposicionAhorroLogic = new CajaDisposicionAhorroLogic();
 			miDebitoLogic = new MiDebitoLogic();
 			objectMapper = new ObjectMapper();
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
+		} catch (BeansException e) {
+	        log.error("Error al inicializar la aplicación: " + e.getMessage());
+	        throw new InitializationException("Error al inicializar la aplicación", e);
+	    }
 	}
 	
 	public Respuesta ahorroTransferencia(AhorroTransferenciaReqOBJ req){
@@ -102,7 +106,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 		Respuesta resultTransferenciaDisposicion = new Respuesta();
 
 		//log.info("{}: Inicia proceso de transferencia",uuidGlobal);
-		try{
+		
 			
 			if(req.getTipoCuentaOrigen() == null) {
 				resp.setCodigo(-2);
@@ -179,12 +183,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			}else {
 				
 			}
-		}catch(Exception e){
-			resp.setCodigo(-1);
-			resp.setMensaje("No se pudo procesar el pago");
-			resp.setData("");
-			log.error(resp,e);
-		}
+		
 		log.info("{}: Finaliza proceso de transferencia",uuidGlobal);
 		
 		
@@ -196,7 +195,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 		Respuesta resultTransferenciaDeposito = new Respuesta();
 		CajaDepositoAhorroReq cajaDepositoAhorroReq = new CajaDepositoAhorroReq();
 		String uuidIndividual = UUID.randomUUID().toString();
-		try{
+		
 			AhorroContratoOBJ ahorroContrato = new AhorroContratoOBJ();
 			ahorroContrato = adao.buscaByCuenta(req.getCuentaDestino());
 			
@@ -232,10 +231,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
             //BitacoraProcesamiento.getInstance().finalizaRegistroBitacora(uuidIndividual,uuidGlonbal);
             /*/////////////////REGISTRO DE BITACORA\\\\\\\\\\\\\\\\\\\\\\\\*/
             
-		}catch(Exception e){
-			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Deposito Transferencia Procrea ] ");
-			return null;
-		}
+		
 		
 		return resultTransferenciaDeposito;
 	}
@@ -248,7 +244,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 		CajaDepositoAhorroReq cajaDepositoAhorroReq = new CajaDepositoAhorroReq();
 		
 		CajaDisposicionAhorroReq cajaDisposicionReq = new CajaDisposicionAhorroReq();
-		try{
+		
 			AhorroContrato ahorroContrato = adao.buscarByCuenta(req.getCuentaDestino());
 			
 			cajaDepositoAhorroReq.setCajaId(ConceptosUtil.CAJA_DEP_TRANSFERENCIA_AHORRO);
@@ -307,19 +303,14 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			log.info("{}: Inicia registro de datos del ahorroTransacciones",uuid);
 			registraAhorroTransferencia(resultTransferenciaDeposito, resultTransferenciaDisposicion);
 			log.info("{}: Fin registro de datos del ahorroTransacciones",uuid);
-		}catch(Exception e){
-			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Transferencia ] ");
-			resp.setCodigo(-1);
-			resp.setMensaje("No se pudo rechazar el pago");
-			resp.setData("");
-		}
+		
 		
 		return resp;
 	}
-	public Respuesta procesaDepositoTransferenciaMiDebito(HeaderWS header, AhorroTransferenciaReqOBJ req, String uuidGlobal){
+	public Respuesta procesaDepositoTransferenciaMiDebito(HeaderWS header, AhorroTransferenciaReqOBJ req, String uuidGlobal) throws IOException{
 		Respuesta resultTransferenciaDeposito = new Respuesta();
 		String uuidIndividual = UUID.randomUUID().toString();
-		try{
+		
 			
 			/*/////////////////REGISTRO DE BITACORA\\\\\\\\\\\\\\\\\\\\\\\\*/
             //BitacoraProcesamiento.getInstance().inicializaRegistroBitacora(uuidIndividual,req.getCuentaOrigen(),BitacoraUtil.REALIZA_DEPOSITO_TRANSFERENCIA);
@@ -351,10 +342,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
             //BitacoraProcesamiento.getInstance().finalizaRegistroBitacora(uuidIndividual,uuidGlobal);
             /*/////////////////REGISTRO DE BITACORA\\\\\\\\\\\\\\\\\\\\\\\\*/
             
-		}catch(Exception e){
-			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Deposito Transferencia Mi Debito ] ");
-			return null;
-		}
+		
 		
 		return resultTransferenciaDeposito;
 	}
@@ -365,7 +353,6 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 		Respuesta resp = new Respuesta();
 		CajaDisposicionAhorroReq cajaDisposicionReq = new CajaDisposicionAhorroReq();
 		String uuidIndividual = UUID.randomUUID().toString();
-		try{
 		
 			cajaDisposicionReq.setCajaId(ConceptosUtil.CAJA_DEP_TRANSFERENCIA_AHORRO);
 			cajaDisposicionReq.setFecha(req.getFecha());
@@ -390,19 +377,15 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 			//log.info(resp);
 
 			
-		}catch(Exception e){
-			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Disposicion Transferencia Procrea ] ");
-			return null;
-		}
+		
 		
 		return resp;
 	}
 	
-	public Respuesta procesaDisposicionTransferenciaMiDebito(HeaderWS header, AhorroTransferenciaReqOBJ req, String uuidGlobal){
+	public Respuesta procesaDisposicionTransferenciaMiDebito(HeaderWS header, AhorroTransferenciaReqOBJ req, String uuidGlobal) throws IOException{
 		Respuesta resultTransferenciaDisposicion = new Respuesta();
 		String uuidIndividual = UUID.randomUUID().toString();
-		try{
-			
+		
 			
 			/*/////////////////REGISTRO DE BITACORA\\\\\\\\\\\\\\\\\\\\\\\\*/
             //BitacoraProcesamiento.getInstance().inicializaRegistroBitacora(uuidIndividual,req.getCuentaDestino(),BitacoraUtil.REALIZA_DISPOSICION_TRANSFERENCIA);
@@ -439,10 +422,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
             //BitacoraProcesamiento.getInstance().finalizaRegistroBitacora(uuidIndividual,uuidGlobal);
             /*/////////////////REGISTRO DE BITACORA\\\\\\\\\\\\\\\\\\\\\\\\*/
 			
-		}catch(Exception e){
-			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ Procesa Disposicion Transferencia Mi Debito ] ");
-			return null;
-		}
+		
 		
 		return resultTransferenciaDisposicion;
 	}
@@ -485,7 +465,7 @@ public class AhorroTransferenciaLogic extends InvokeLogsWsJob {
 					}
 				}
 			}
-		}catch(Exception e) {
+		}catch(IOException e) {
 			log.error("Error " + " [ Ahorro Transferencia Logic ] " + " [ AL REGISTRAR AHORRO TRANSFERENCIA  ] ");
 		}
 		
