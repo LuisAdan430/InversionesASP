@@ -1,16 +1,22 @@
+
 package net.cero.ahorro.logica;
 
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import javax.xml.ws.WebServiceException;
+
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.InitializationException;
+import org.springframework.beans.BeansException;
 
 import com.google.gson.Gson;
 
@@ -30,6 +36,7 @@ import net.cero.plastico.obtenersaldo.ObtenerSaldoResponse;
 import net.cero.seguridad.utilidades.ConceptosUtilBanca;
 //import net.cero.plasticos.data.RespuestaSVC;
 import net.cero.seguridad.utilidades.ConstantesUtil;
+import net.cero.seguridad.utilidades.SpecificException;
 import net.cero.spring.config.Apps;
 import net.cero.spring.dao.TransaccionesDAO;
 import net.cero.ws.data.PlaHeaderWS;
@@ -63,66 +70,64 @@ public class MiDebitoLogic {
 			}
 			dao = (TransaccionesDAO) s.getApplicationContext().getBean("TransaccionesDAO");
 			gson = new Gson();
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
+		} catch (BeansException e) {
+	        log.error("Error al inicializar la aplicación: " + e.getMessage());
+	        throw new InitializationException("Error al inicializar la aplicación", e);
+	    }
 	}
-	private Double consultaSaldoAhorroMiDebitoConPlastico(String plastico){
-		Double saldoDisponible = 0.00;
-		try {
-			URL wsdl = null;
-			try {
-				wsdl = new URL(ObtenerSaldoIfzService.WSDL_LOCATION.toString().replace("localhost",  ConstantesUtil.SERVICIO_BASE_PLASTICOS));
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				log.error("Error " + " [ Mi Debito Logic ] " + " [ Consultar URL obtener Saldo Ifz Service ] ");
-			}
-			ObtenerSaldoIfzService service1 = new ObtenerSaldoIfzService(wsdl);
-			ObtenerSaldoIfz port1 = service1.getObtenerSaldoIfzPort();
+	private Double consultaSaldoAhorroMiDebitoConPlastico(String plastico) throws SpecificException {
+	    Double saldoDisponible = 0.00;
+	    try {
+	        URL wsdl = new URL(ObtenerSaldoIfzService.WSDL_LOCATION.toString().replace("localhost", ConstantesUtil.SERVICIO_BASE_PLASTICOS));
+	        ObtenerSaldoIfzService service1 = new ObtenerSaldoIfzService(wsdl);
+	        ObtenerSaldoIfz port1 = service1.getObtenerSaldoIfzPort();
 
-			PlaHeaderWS header = new PlaHeaderWS();
-			header.setIdEmpresa(1L);
-			header.setIdCanalAtencion(2L);
-			header.setIdSucursal(1L);
-			header.setIdUsuario(9L);
+	        PlaHeaderWS header = new PlaHeaderWS();
+	        header.setIdEmpresa(1L);
+	        header.setIdCanalAtencion(2L);
+	        header.setIdSucursal(1L);
+	        header.setIdUsuario(9L);
 
-			ObtenerSaldoRequest req = new ObtenerSaldoRequest();
-			DatosPlasticoREQ pla = new DatosPlasticoREQ();
-			pla.setPlastico(plastico);
+	        ObtenerSaldoRequest req = new ObtenerSaldoRequest();
+	        DatosPlasticoREQ pla = new DatosPlasticoREQ();
+	        pla.setPlastico(plastico);
 
-			req.setHeader(header);
-			req.setDatosPlasticoREQ(pla);
+	        req.setHeader(header);
+	        req.setDatosPlasticoREQ(pla);
 
-			ObtenerSaldoResponse response = port1.procesar(req);
-			RespuestaXML respuesta = response.getReturn();
+	        ObtenerSaldoResponse response = port1.procesar(req);
+	        RespuestaXML respuesta = response.getReturn();
 
-			if(response.getReturn().getErrores().getCodigoError() == 0){
-				if(gson == null) initialized();
+	        if (response.getReturn().getErrores().getCodigoError() == 0) {
+	            if (gson == null) initialized();
 
-				DatosPlasticoOBJ obj = (DatosPlasticoOBJ)gson.fromJson(respuesta.getBody().obtenerParametro("DATOS_PLASTICO_OBJ"), DatosPlasticoOBJ.class);
-				String resultado = (String)respuesta.getBody().obtenerParametro("RESULTADO");
-				String respuestaXML = (String)respuesta.getBody().obtenerParametro("RESPUESTA_XML");
+	            DatosPlasticoOBJ obj = (DatosPlasticoOBJ) gson.fromJson(respuesta.getBody().obtenerParametro("DATOS_PLASTICO_OBJ"), DatosPlasticoOBJ.class);
+	            String resultado = (String) respuesta.getBody().obtenerParametro("RESULTADO");
+	            String respuestaXML = (String) respuesta.getBody().obtenerParametro("RESPUESTA_XML");
 
-				if(obj != null) {
-					System.out.println(obj.getCodigo());
-					System.out.println(obj.getDescripcion());
-					System.out.println(obj.getMontoDisponible());
-					saldoDisponible = obj.getMontoDisponible();
-				}
+	            if (obj != null) {
+	                System.out.println(obj.getCodigo());
+	                System.out.println(obj.getDescripcion());
+	                System.out.println(obj.getMontoDisponible());
+	                saldoDisponible = obj.getMontoDisponible();
+	            }
 
-				System.out.println(resultado);
-				System.out.println(respuestaXML);
-			}else{
-				System.out.println("Codigo Error: " + response.getReturn().getErrores().getCodigoError());
-				System.out.println("       Error: " + response.getReturn().getErrores().getDescError());
-				
-				///////////////temporal para pruebas
-			}
-		}catch(Exception e) {
-			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito Con Plastico ] ");
-		}
-		return saldoDisponible;
+	            System.out.println(resultado);
+	            System.out.println(respuestaXML);
+	        } else {
+	            System.out.println("Codigo Error: " + response.getReturn().getErrores().getCodigoError());
+	            System.out.println("       Error: " + response.getReturn().getErrores().getDescError());
+
+	            // Manejo de errores específicos aquí
+	        }
+	    } catch (MalformedURLException e) {
+	    	 throw new SpecificException("Error al procesar la URL del servicio");
+	    } catch (WebServiceException e) {
+	        throw new SpecificException("Error de WebService al procesar la solicitud");
+	    } 
+	    return saldoDisponible;
 	}
+
 	public Double consultaSaldoAhorroMiDebito(AhorroCuentaMiDebitoOBJ miDebito){
 		initialized();
 		Double saldoDisponible = 0.00;
