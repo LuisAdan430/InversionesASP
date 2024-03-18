@@ -18,62 +18,20 @@ public class SpecificException extends Exception {
         super(cause);
     }
 
-    // Excepción específica de archivo no encontrado
-    public static class FileNotFoundException extends SpecificException {
-        public FileNotFoundException() {
+    public static class Generico extends SpecificException {
+        public  Generico() {
             super();
         }
 
-        public FileNotFoundException(String message) {
+        public  Generico(String message) {
             super(message);
         }
 
-        public FileNotFoundException(String message, Throwable cause) {
+        public  Generico(String message, Throwable cause) {
             super(message, cause);
         }
 
-        public FileNotFoundException(Throwable cause) {
+        public  Generico(Throwable cause) {
             super(cause);
         }
-    }
-
-    // Excepción específica de entrada/salida
-    public static class IOException extends SpecificException {
-        public IOException() {
-            super();
-        }
-
-        public IOException(String message) {
-            super(message);
-        }
-
-        public IOException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public IOException(Throwable cause) {
-            super(cause);
-        }
-    }
-
-    // Excepción específica de división por cero
-    public static class DivideByZeroException extends SpecificException {
-        public DivideByZeroException() {
-            super();
-        }
-
-        public DivideByZeroException(String message) {
-            super(message);
-        }
-
-        public DivideByZeroException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public DivideByZeroException(Throwable cause) {
-            super(cause);
-        }
-    }
-
-    // Agrega aquí más excepciones comunes según tus necesidades
-}
+    }}

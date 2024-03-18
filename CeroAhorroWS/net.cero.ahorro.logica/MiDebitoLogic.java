@@ -1,7 +1,7 @@
-
 package net.cero.ahorro.logica;
 
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import javax.xml.ws.WebServiceException;
@@ -128,11 +128,11 @@ public class MiDebitoLogic {
 	    return saldoDisponible;
 	}
 
-	public Double consultaSaldoAhorroMiDebito(AhorroCuentaMiDebitoOBJ miDebito){
+	public Double consultaSaldoAhorroMiDebito(AhorroCuentaMiDebitoOBJ miDebito)  throws SpecificException{
 		initialized();
 		Double saldoDisponible = 0.00;
 		//NCProveedorTarjeta datosNC;
-		try {
+		
 			if(miDebito.getTienePlastico().equals("SI")) {
 				//datosNC = dao.consultaPlasticoProveedor(miDebito.getCuenta(), miDebito.getPan());
 				switch(miDebito.getProveedor()) {
@@ -146,9 +146,7 @@ public class MiDebitoLogic {
 			}else {
 				saldoDisponible = consultaSaldoAhorroMiDebitoSinPlastico(miDebito.getCuenta());
 			}
-		}catch(Exception e) {
-			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito ] ");
-		}
+		
 		return saldoDisponible;
 	}
 	public Double consultaSaldoAhorroMiDebitoSinPlastico(String cuenta){
@@ -163,10 +161,9 @@ public class MiDebitoLogic {
 				}
 			}
 			
-		}catch(Exception e) {
-			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito Sin Plastico ] ");
-
-		}
+		 } catch (NumberFormatException e) {
+		        log.error("Error de formato al parsear el saldo: " + e.getMessage());
+		 }
 		return saldoDisponible;
 	}
 	public Double consultaSaldoAhorroMiDebito(String plastico){
@@ -220,9 +217,9 @@ public class MiDebitoLogic {
 				
 				///////////////temporal para pruebas
 			}
-		}catch(Exception e) {
-			log.error("Error " + " [ Mi Debito Logic ] " + " [ Consulta Saldo Ahorro Mi Debito ] ");
-		}
+		} catch (WebServiceException e) {
+	        log.error("Error [ Mi Debito Logic ] [ Consulta Saldo Ahorro Mi Debito - Web Service ] ", e);
+	    }
 		return saldoDisponible;
 	}
 	
