@@ -28,8 +28,9 @@ import net.cero.ahorro.logica.RealizarPagosASPLogic;
 import net.cero.data.InformacionInversionASPReq;
 import net.cero.data.NuevaInversionASPReq;
 import net.cero.data.Respuesta;
-import net.cero.promesi.SpecificException;
 import net.cero.seguridad.utilidades.ConstantesInversiones;
+import net.cero.seguridad.utilidades.CustomException;
+import net.cero.seguridad.utilidades.SpecificException;
 import net.cero.spring.config.IPAuthenticationProvider;
 
 import org.apache.logging.log4j.Logger;
@@ -198,7 +199,7 @@ public class InversionesASP {
 	        jsonResponse = gson.toJson(resp);
 	        response = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
 	        return response;
-	    } catch (SpecificException e) {
+	    } catch (CustomException e) {
 	        resp.setCodigo(-1);
 	        resp.setMensaje("Error específico 1: " + e.getMessage());
 	        resp.setData(null);

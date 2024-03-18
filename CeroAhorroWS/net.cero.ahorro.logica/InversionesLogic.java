@@ -2,6 +2,7 @@ package net.cero.ahorro.logica;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -16,6 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
+import org.apache.logging.log4j.core.tools.picocli.CommandLine.InitializationException;
+import org.springframework.beans.BeansException;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +39,7 @@ import net.cero.data.Solicitante;
 import net.cero.seguridad.utilidades.ConceptosUtil;
 import net.cero.seguridad.utilidades.ConstantesUtil;
 import net.cero.seguridad.utilidades.HeaderWS;
+import net.cero.seguridad.utilidades.SpecificException;
 import net.cero.spring.config.Apps;
 import net.cero.spring.dao.AhorroCuentasDAO;
 import net.cero.spring.dao.AhorroCuentasMiDebitoDAO;
@@ -121,9 +125,10 @@ public class InversionesLogic {
 			ahdao = (AhorroCuentasDAO) s.getApplicationContext().getBean("AhorroCuentasDAO");
 			acmdao = (AhorroCuentasMiDebitoDAO) s.getApplicationContext().getBean("AhorroCuentasMiDebitoDAO");
 			gson = new Gson();
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
+		} catch (BeansException e) {
+	        log.error("Error al inicializar la aplicación: " + e.getMessage());
+	        throw new InitializationException("Error al inicializar la aplicación", e);
+	    }
 	}
 
 	private File convertMultiPartToFile(MultipartFile file) {
@@ -133,8 +138,8 @@ public class InversionesLogic {
 	        fos = new FileOutputStream(convFile);
 	        fos.write(file.getBytes());
 	        return convFile;
-	    } catch (Exception e) {
-	        log.error("Error [ Inversiones Logic ] [ convert Multi Part To File ] ");
+	    } catch (IOException e) {
+	        log.error("Error [ Inversiones Logic ] [ convert Multi Part To File ] ", e);
 	    } finally {
 	        try {
 	            if (fos != null) {
@@ -147,7 +152,7 @@ public class InversionesLogic {
 	    return null;
 	}
 
-	public Respuesta crearInversion(String nombreEndpoint, String sessionId, NuevaInversionReq req) {
+	public Respuesta crearInversion(String nombreEndpoint, String sessionId, NuevaInversionReq req) throws JRException {
 		initialized();
 		EnviaNotificacionesMail mail = new EnviaNotificacionesMail();
 		String Textoresultado;
@@ -413,7 +418,7 @@ public class InversionesLogic {
 								respuesta.setData(null);
 								return respuesta;
 							}
-						} catch (Exception e) {
+						} catch (IOException e) {
 							log.error("Error " + " [ AhorroDAO] " + " [ Crear Inversion] ");
 							respuesta.setCodigo(-2);
 							respuesta.setMensaje("Error de comunicacion 1");
@@ -428,12 +433,22 @@ public class InversionesLogic {
 					log.info("Error al realizar la transaccion entre cuentas");
 					return rsp;
 				}
-			} catch (Exception e) {
-				log.error("Error " + " [ AhorroDAO] " + " [ Crear la cuenta de Inversion] ");
-				resp.setCodigo(-2);
-				resp.setMensaje("Error de comunicacion 2 "+e.getMessage());
-				return resp;
-			}
+			
+
+			
+} catch (SQLException e) {
+			    log.error("Error de SQL: " + e.getMessage());
+			    resp.setCodigo(-2);
+			    resp.setMensaje("Error de comunicacion 2 " + e.getMessage());
+			    return resp;
+			
+
+
+
+			
+}
+
+
 			return resp;
 	}
 	private String generaCuerpoCorreoCodigo(String nombre_sorteo,Integer boleto,String nombre_persona){
@@ -563,25 +578,18 @@ public class InversionesLogic {
 		AhorroTransferenciaLogic logic = new AhorroTransferenciaLogic();
 		String uuidGlobal = UUID.randomUUID().toString();
 		Respuesta resp = new Respuesta();
-		try{
-			net.cero.data.AhorroTransferenciaReqOBJ req = new net.cero.data.AhorroTransferenciaReqOBJ();
-			req.setCuentaOrigen(cuentaOrigen);
-			req.setCuentaDestino(cuentaDestino);
-			req.setFecha(new Date());
-			req.setMonto(monto.doubleValue());
-			req.setUsuarioId(Integer.valueOf(ConstantesUtil.USUARIO_SISTEMAS));
-			req.setTipoCuentaOrigen(tipoCuentaOrigen);
-			req.setTipoCuentaDestino(tipoCuentaDestino);
-			req.setConceptoOrigen("Transferencia a cuenta " + req.getCuentaDestino());
-			req.setConceptoDestino("Deposito a plazo de " + cuentaDestino);
+		net.cero.data.AhorroTransferenciaReqOBJ req = new net.cero.data.AhorroTransferenciaReqOBJ();
+		req.setCuentaOrigen(cuentaOrigen);
+		req.setCuentaDestino(cuentaDestino);
+		req.setFecha(new Date());
+		req.setMonto(monto.doubleValue());
+		req.setUsuarioId(Integer.valueOf(ConstantesUtil.USUARIO_SISTEMAS));
+		req.setTipoCuentaOrigen(tipoCuentaOrigen);
+		req.setTipoCuentaDestino(tipoCuentaDestino);
+		req.setConceptoOrigen("Transferencia a cuenta " + req.getCuentaDestino());
+		req.setConceptoDestino("Deposito a plazo de " + cuentaDestino);
 
-			resp = logic.procesaTransferencia(header, req, uuidGlobal);
-			
-		}catch(Exception e) {
-			log.error("Error en realizar deposito: " + e.getMessage());
-			resp.setCodigo(1);
-			resp.setMensaje("Error al realizar el deposito a la cuenta de inversión");
-		}
+		resp = logic.procesaTransferencia(header, req, uuidGlobal);
 		
 
 		return resp;
@@ -700,16 +708,12 @@ public class InversionesLogic {
 		return resp;
 	}
 	private String generaCuentaClabe(String referencia, int ahorroId, String sucursalApertura) {
-		try {
+		
 			GenerarClabeLogic generaClabe = new GenerarClabeLogic();
 			String cuentaClabe = "";
-			cuentaClabe = generaClabe.generarClabe(referencia,
-					ahorroId, sucursalApertura);
+			cuentaClabe = generaClabe.generarClabe(referencia,ahorroId, sucursalApertura);
 			return cuentaClabe;
-		} catch (Exception e) {
-			log.error("Error " + " [ AhorroDAO] " + " [ Genera Cuenta Clabe] ");
-			return null;
-		}
+		
 	}
 	
 	private BigDecimal obtenerSaldo(String cuenta) {
@@ -722,7 +726,7 @@ public class InversionesLogic {
 			miDebito = acmdao.buscarMiDebitoByCuenta(cuenta,
 					ConceptosUtil.CLAVE_CONCEPTO_DATOS_CUENTA, ConceptosUtil.ESTATUS_CONCEPTO_DATOS_CUENTA);
 			saldo = midebitologic.consultaSaldoAhorroMiDebito(miDebito);
-		}catch(Exception e) {
+		}catch(SpecificException e) {
 			log.error("Error " + " [ AhorroDAO] " + " [ Error al consultar el saldo ] ");
 		}
 		return new BigDecimal(saldo.doubleValue());

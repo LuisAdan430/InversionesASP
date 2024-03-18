@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,17 +36,20 @@ public class InversionesDAO {
 		Integer contratoId = null;
 		try {
 			contratoId = jdbcTemplatePr.queryForObject(ahorroContratoId,Integer.class,cuenta);
-		}catch(Exception e) {
-			log.error("Error " + " [ InversionesDAO ] " + " [ Ahorro Contrato Id ] ");
-		}
+		 } catch (DataAccessException e) {
+		        log.error("Error " + " [ InversionesDAO ] " + " [ Ahorro Contrato Id ] "+ e.getMessage());
+		        throw new RuntimeException("Error " + " [ InversionesDAO ] " + " [ Ahorro Contrato Id ] ", e);
+		 }
 		return contratoId;
 	}
 	public Integer plazoReinversionM(Integer rendimientoId) {
 		Integer plazoReinversionV = null;
 		try {
 			plazoReinversionV = jdbcTemplatePr.queryForObject(plazoReinversion,Integer.class,rendimientoId);
-		}catch(Exception e) {
-			log.error("Error " + " [ InversionesDAO ] " + " [ Plazo Reinversion M ] ");
+		
+		} catch (DataAccessException e) {
+			log.error("Error " + " [ InversionesDAO ] " + " [ Plazo Reinversion M ] "+ e.getMessage());
+			throw new RuntimeException("Error " + " [ InversionesDAO ] " + " [ Plazo Reinversion M ] ", e);
 		}
 		return  plazoReinversionV;
 	}
@@ -57,10 +61,10 @@ public class InversionesDAO {
 							new Object[] {cuenta}, 
 							new BeanPropertyRowMapper<ObtenerInfoAhorroContrato>(ObtenerInfoAhorroContrato.class));
 			return infoTablaAhorroContrato;		
-		}catch(Exception e) {
-			log.error("Error " + " [ InversionesDAO ] " + " [ Ahorro Contrato ] ");
+		}catch (DataAccessException e) {
+			log.error("Error " + " [ InversionesDAO ] " + " [ Ahorro Contrato ]  "+ e.getMessage());
+			throw new RuntimeException("Error " + " [ InversionesDAO ] " + " [ Ahorro Contrato ]  ", e);
 		}
-		return null;
 		
 	}
 	
@@ -75,24 +79,22 @@ public class InversionesDAO {
 			
 			return tazasPlazosList;
 			
-		} catch (Exception ex) {
-			log.error("Error " + " [ InversionesDAO ] " + " [ Obtener Tazas Plazos By Canal And Plazo ] ");
+		
+		}catch (DataAccessException e) {
+			log.error("Error " + " [ InversionesDAO ] " + " [ Obtener Tazas Plazos By Canal And Plazo ]  "+ e.getMessage());
+			throw new RuntimeException("Error " + " [ InversionesDAO ] " + " [ Obtener Tazas Plazos By Canal And Plazo ]  ", e);
 		}
 		
-		return null;
 		
 	}
-	
-	
-	
-	
 	
 	public Double porcentajeDAO(Integer rendimientoId) {
 		Double porcentajeReturn = 0.0;
 		try {
 			porcentajeReturn = jdbcTemplatePr.queryForObject(porcentaje,Double.class,rendimientoId);
-		}catch(Exception e) {
-			log.error("Error " + " [ InversionesDAO ] " + " [ Porcentaje DAO ] ");
+		}catch (DataAccessException e) {
+			log.error("Error " + " [ InversionesDAO ] " + " [ Porcentaje DAO ]  "+ e.getMessage());
+			throw new RuntimeException("Error " + " [ InversionesDAO ] " + " [ Porcentaje DAO ]  ", e);
 		}
 		return  porcentajeReturn;
 	}
@@ -108,11 +110,10 @@ public class InversionesDAO {
 			
 			return tazasPlazosList;
 			
-		} catch (Exception ex) {
-			log.error("Error " + " [ InversionesDAO ] " + " [ Obtener Tazas Plazos ] ");
+		}catch (DataAccessException e) {
+			log.error("Error " + " [ InversionesDAO ] " + " [ Obtener Tazas Plazos   "+ e.getMessage());
+			throw new RuntimeException("Error " + " [ InversionesDAO ] " + " [ Porcentaje DAO ]  ", e);
 		}
-		
-		return null;
 		
 	}
 	
@@ -136,8 +137,10 @@ public class InversionesDAO {
 							new Object[] {id},
 							new BeanPropertyRowMapper<CapitalizarRendimientosOBJ>(CapitalizarRendimientosOBJ.class));
 			
-		} catch (Exception ex) {
-			log.error("Error " + " [ InversionesDAO ] " + " [ Obtener Capitalizar Rendimientos OBJ ] ");
+		
+		}catch (DataAccessException e) {
+			log.error("Error " + " [ InversionesDAO ] " + "  [ Obtener Capitalizar Rendimientos OBJ ]  "+ e.getMessage());
+			throw new RuntimeException("Error " + " [ InversionesDAO ] " + "  [ Obtener Capitalizar Rendimientos OBJ ]  ", e);
 		}
 		
 		return capitalizarRendimientosObjList;
@@ -168,9 +171,10 @@ public class InversionesDAO {
 	public Integer sigSecAhreinversion() {
 		try {
 			return jdbcTemplatePr.queryForObject(sigSecAhreinversion, Integer.class);
-		} catch (Exception e) {
-			log.error("Error " + " [ InversionesDAO ] " + " [ Sig Sec AhReinversion ] ");
-			return 0;
+		
+		}catch (DataAccessException e) {
+			log.error("Error " + " [ InversionesDAO ] " + "  [ Sig Sec AhReinversion ]]  "+ e.getMessage());
+			throw new RuntimeException("Error " + " [ InversionesDAO ] " + "  [ Sig Sec AhReinversion ]  ", e);
 		}
 	}
 	
