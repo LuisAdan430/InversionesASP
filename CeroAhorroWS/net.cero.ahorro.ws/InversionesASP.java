@@ -2,6 +2,7 @@ package net.cero.ahorro.ws;
 
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class InversionesASP {
 
 
 	@RequestMapping(value= "/crearInversionASP", method = RequestMethod.POST, produces = "text/plain;charset=UTF-8")
-	public ResponseEntity<String> crearInversion(@RequestBody String peticion) throws IOException {
+	public ResponseEntity<String> crearInversion(@RequestBody String peticion) throws IOException, CustomException, SQLException {
 	    SecurityContext securityContext = SecurityContextHolder.getContext();
 	    Authentication authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
 	    if (!authenticate.isAuthenticated()) {
